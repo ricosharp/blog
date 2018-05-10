@@ -1,0 +1,53 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+@charset "utf-8";
+
+@import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
+@import "minimal-mistakes"; // main partials
+
+
+/*CSS to override theme defaults*/
+/*=============================*/
+
+/*Masthead Customizations*/
+/*File settings are overidding: _masthead.scss*/
+/*                              _navigation.scss*/
+/*Makes site title appear in normal text in masthead, rather than bold*/
+/*.masthead and .greedy-nav set the same footer color as the masthead background color*/
+/*=============================*/
+.site-title {
+  font-weight: normal;
+}
+
+.masthead {
+  background: $footer-background-color;
+}
+.greedy-nav {
+  background: $footer-background-color;
+}
+
+/*Page Customizations*/
+/*File settings are overidding: _page.scss*/
+/*Changes font sizes on all pages, including home and about*/
+
+.archive__item-title {
+  font-size: $type-size-5;
+}
+
+.page__title {
+  font-size: $type-size-5;
+}
+
+.page__content {
+  p,
+  li,
+  dl {
+    font-size: $type-size-6;
+  }
+}
+
+.page__meta {
+  font-size: $type-size-7;
+}
