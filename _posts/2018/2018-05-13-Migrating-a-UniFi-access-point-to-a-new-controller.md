@@ -36,8 +36,6 @@ The access point will now be managed by the new controller.
 
 ## Notes
 
-A little bit of test content.
-
 The last time I did this, the access points did not adopt straight away. They would go through the process of adopting, then after five minutes, the status would still say adopting. In this case I had to run the set-inform command again on the access point, then I had the option to adopt again on the controller. The second time around seemed to work.
 
 You can view the logs on the access point with the following commands:
