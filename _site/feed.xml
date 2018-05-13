@@ -1,1 +1,59 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-05-11T22:51:52-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">My First Jekyll Post</title><link href="http://localhost:4000/2018/My-First-Jekyll-Post" rel="alternate" type="text/html" title="My First Jekyll Post" /><published>2018-05-06T00:00:00-04:00</published><updated>2018-05-06T00:00:00-04:00</updated><id>http://localhost:4000/2018/My-First-Jekyll-Post</id><content type="html" xml:base="http://localhost:4000/2018/My-First-Jekyll-Post">&lt;p&gt;Hello World!&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Hello World!</summary></entry></feed>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-05-12T21:19:38-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">ScreenCloud Player on a Raspberry Pi</title><link href="http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi" rel="alternate" type="text/html" title="ScreenCloud Player on a Raspberry Pi" /><published>2018-05-12T00:00:00-04:00</published><updated>2018-05-12T00:00:00-04:00</updated><id>http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi</id><content type="html" xml:base="http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi">&lt;p&gt;&lt;a href=&quot;https://screen.cloud&quot;&gt;ScreenCloud&lt;/a&gt; is a digital signage solution that is very user friendly. It is simple to configure, and compatible with variety of TV’s and devices.&lt;/p&gt;
+
+&lt;p&gt;This guide will go through the process of installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.&lt;/p&gt;
+
+&lt;h2 id=&quot;configuration&quot;&gt;Configuration&lt;/h2&gt;
+
+&lt;p&gt;On a newly installed Raspbian system, download and install all updates, then reboot.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt update &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt upgrade &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;reboot&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Open Chromium and install the &lt;a href=&quot;https://chrome.google.com/webstore/detail/screencloud-digital-signa/efdahhfldoeikfglgolhibmdidbnpneo?hl=en&quot;&gt;ScreenCloud Digital Signage Player&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2018/sc-add-to-chrome.png&quot; alt=&quot;Add to Chrome&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note the app-id in the URL is efdahhfldoeikfglgolhibmdidbnpneo. We will need this later when configuring the application to automatically start on boot.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;The application will automatically open once it is added to Chromium. Exit full screen by pressing escape on the keyboard and close the application.&lt;/p&gt;
+
+&lt;p&gt;Configure Chromium to automatically start the ScreenCloud Player by editing the autostart file. Also, now is a good time to disable the screensaver.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;nano /home/pi/.config/lxsession/LXDE-pi/autostart
+
+&lt;span class=&quot;c&quot;&gt;# Add this line:&lt;/span&gt;
+@chromium &lt;span class=&quot;nt&quot;&gt;--app-id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;efdahhfldoeikfglgolhibmdidbnpneo &lt;span class=&quot;nt&quot;&gt;--disable-session-crashed-bubble&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Comment out this line&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#@xscreensaver -no-splash&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Reboot the system. The pi will automatically login and start the ScreenCloud Player.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;reboot&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;notes&quot;&gt;Notes&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;The default username and password is raspberry/pi, which is assumed to be in use for this guide.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;If you need to install Chromium, run the following command:&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt install chromium &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
+OR
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt install chromium-browser &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;If the pi is not set to automatically login do the following:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;raspi-config
+3 Boot Options &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; B1 Desktop / CLI &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; B4 Desktop Autologin&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot</summary></entry><entry><title type="html">My First Jekyll Post</title><link href="http://localhost:4000/2018/My-First-Jekyll-Post" rel="alternate" type="text/html" title="My First Jekyll Post" /><published>2018-05-06T00:00:00-04:00</published><updated>2018-05-06T00:00:00-04:00</updated><id>http://localhost:4000/2018/My-First-Jekyll-Post</id><content type="html" xml:base="http://localhost:4000/2018/My-First-Jekyll-Post">&lt;p&gt;Hello World!&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Hello World!</summary></entry></feed>

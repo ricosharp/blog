@@ -31,7 +31,6 @@
 /*Page Customizations*/
 /*File settings are overidding: _page.scss*/
 /*Changes font sizes on all pages, including home and about*/
-
 .archive__item-title {
   font-size: $type-size-5;
 }
@@ -49,5 +48,34 @@
 }
 
 .page__meta {
+  font-size: $type-size-8;
+}
+
+/*Syntax Customizations(Highlighting)*/
+/*File settings are overidding: _syntax.scss*/
+/*Fix font size in syntax highlighing to match other CSS changes*/
+/*The margin-top setting is not explicitly set in _syntax.scss but is there to remove the large gap between elements above the figure*/
+figure.highlight {
   font-size: $type-size-7;
+  margin-top: 0;
+}
+
+/*Syntax Customizations(Highlighting)*/
+/*File settings are overidding: _base.scss*/
+/*Heading font-sizes*/
+/*NOTE that the _base.scss goes all the way to h6*/
+h1 {
+  font-size: $type-size-5;
+}
+
+h2 {
+  font-size: $type-size-6;
+}
+
+h3 {
+  font-size: $type-size-7;
+}
+
+h4 {
+  font-size: $type-size-8;
 }
