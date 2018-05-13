@@ -270,7 +270,7 @@ defaults:
       comments: true
       share: false
       related: true
-      permalink: ":year/:title"
+      permalink: "/posts/:year/:title"
   # pages
   - scope:
       path: ""

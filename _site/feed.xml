@@ -1,4 +1,45 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-05-12T21:19:38-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">ScreenCloud Player on a Raspberry Pi</title><link href="http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi" rel="alternate" type="text/html" title="ScreenCloud Player on a Raspberry Pi" /><published>2018-05-12T00:00:00-04:00</published><updated>2018-05-12T00:00:00-04:00</updated><id>http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi</id><content type="html" xml:base="http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi">&lt;p&gt;&lt;a href=&quot;https://screen.cloud&quot;&gt;ScreenCloud&lt;/a&gt; is a digital signage solution that is very user friendly. It is simple to configure, and compatible with variety of TV’s and devices.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-05-13T11:47:54-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Migrating a UniFi access point to a new controller</title><link href="http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller" rel="alternate" type="text/html" title="Migrating a UniFi access point to a new controller" /><published>2018-05-13T00:00:00-04:00</published><updated>2018-05-13T00:00:00-04:00</updated><id>http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller</id><content type="html" xml:base="http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller">&lt;p&gt;If you have an access point that is already tied to an existing UniFi controller, you can migrate it to a new one without having to physically touch the device.&lt;/p&gt;
+
+&lt;p&gt;I needed to do this in the past to move a bunch of access points from a failing &lt;a href=&quot;https://www.ubnt.com/unifi/unifi-cloud-key/&quot;&gt;Cloud Key&lt;/a&gt;, and onto a new controller running on a virtual machine.&lt;/p&gt;
+
+&lt;p&gt;You will need the following:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;IP address of the access point.&lt;/li&gt;
+  &lt;li&gt;Superadmin login of the previous controller.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;SSH to the access point. Here you will need to use the superadmin login of the previous controller. Next, note down the MAC address by doing an ifconfig. Then finally, reset the access point to its factory defaults.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh ip-or-hostname-of-access-point
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ifconfig
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;syswrapper.sh restore-default&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The access point can take about a minute to reset. Ping it until you receive a reply, so you know when it is ready to be adopted by the new controller.&lt;/p&gt;
+
+&lt;p&gt;Now tell the access point to talk to the new controller by invoking the set-inform command.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh ip-or-hostname-of-access-point
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;set-inform http://ip-address-or-hostname-of-new-controller:8080/inform&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Open a browser and go to &lt;em&gt;http://ip-address-or-hostname-of-new-controller:8080&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Login, go to Devices, then click Adopt on the access point.&lt;/p&gt;
+
+&lt;p&gt;The access point will now be managed by the new controller.&lt;/p&gt;
+
+&lt;h2 id=&quot;notes&quot;&gt;Notes&lt;/h2&gt;
+
+&lt;p&gt;A little bit of test content.&lt;/p&gt;
+
+&lt;p&gt;The last time I did this, the access points did not adopt straight away. They would go through the process of adopting, then after five minutes, the status would still say adopting. In this case I had to run the set-inform command again on the access point, then I had the option to adopt again on the controller. The second time around seemed to work.&lt;/p&gt;
+
+&lt;p&gt;You can view the logs on the access point with the following commands:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;tail /var/log/messages
+OR
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;less /var/log/messages&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If you do not have a static IP reservation in DHCP, then the &lt;a href=&quot;https://chrome.google.com/webstore/detail/ubiquiti-device-discovery/hmpigflbjeapnknladcfphgkemopofig?hl=en&quot;&gt;Ubiquiti Device Discover Tool&lt;/a&gt; for Chrome is quite useful for finding the device. You must be on the same LAN as the access point to use this. Run a scan and find the IP address that corresponds to the MAC address from the ifconfig before. You can even use this tool to run the set-inform.&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to migrate an existing access point to a new UniFi controller.</summary></entry><entry><title type="html">ScreenCloud Player on a Raspberry Pi</title><link href="http://localhost:4000/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi" rel="alternate" type="text/html" title="ScreenCloud Player on a Raspberry Pi" /><published>2018-05-12T00:00:00-04:00</published><updated>2018-05-12T00:00:00-04:00</updated><id>http://localhost:4000/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi</id><content type="html" xml:base="http://localhost:4000/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi">&lt;p&gt;&lt;a href=&quot;https://screen.cloud&quot;&gt;ScreenCloud&lt;/a&gt; is a digital signage solution that is very user friendly. It is simple to configure, and compatible with variety of TV’s and devices.&lt;/p&gt;
 
 &lt;p&gt;This guide will go through the process of installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.&lt;/p&gt;
 
@@ -34,26 +75,17 @@
 
 &lt;h2 id=&quot;notes&quot;&gt;Notes&lt;/h2&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;The default username and password is raspberry/pi, which is assumed to be in use for this guide.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;If you need to install Chromium, run the following command:&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;The default username and password is raspberry/pi, which is assumed to be in use for this guide.&lt;/p&gt;
+
+&lt;p&gt;If you need to install Chromium, run the following command:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt install chromium &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
 OR
 ~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt install chromium-browser &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;If the pi is not set to automatically login do the following:&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;If the pi is not set to automatically login do the following:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;raspi-config
 3 Boot Options &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; B1 Desktop / CLI &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; B4 Desktop Autologin&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot</summary></entry><entry><title type="html">My First Jekyll Post</title><link href="http://localhost:4000/2018/My-First-Jekyll-Post" rel="alternate" type="text/html" title="My First Jekyll Post" /><published>2018-05-06T00:00:00-04:00</published><updated>2018-05-06T00:00:00-04:00</updated><id>http://localhost:4000/2018/My-First-Jekyll-Post</id><content type="html" xml:base="http://localhost:4000/2018/My-First-Jekyll-Post">&lt;p&gt;Hello World!&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Hello World!</summary></entry></feed>
+&lt;p&gt;An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.</summary></entry><entry><title type="html">My First Jekyll Post</title><link href="http://localhost:4000/posts/2018/My-First-Jekyll-Post" rel="alternate" type="text/html" title="My First Jekyll Post" /><published>2018-05-06T00:00:00-04:00</published><updated>2018-05-06T00:00:00-04:00</updated><id>http://localhost:4000/posts/2018/My-First-Jekyll-Post</id><content type="html" xml:base="http://localhost:4000/posts/2018/My-First-Jekyll-Post">&lt;p&gt;Hello World!&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Hello World!</summary></entry></feed>

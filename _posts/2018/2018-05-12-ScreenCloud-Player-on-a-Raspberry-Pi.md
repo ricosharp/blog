@@ -1,6 +1,6 @@
 ---
 title: "ScreenCloud Player on a Raspberry Pi"
-excerpt: "Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot"
+excerpt: "Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot."
 ---
 [ScreenCloud](https://screen.cloud) is a digital signage solution that is very user friendly. It is simple to configure, and compatible with variety of TV's and devices.
 
@@ -41,19 +41,19 @@ Reboot the system. The pi will automatically login and start the ScreenCloud Pla
 
 ## Notes
 
-- The default username and password is raspberry/pi, which is assumed to be in use for this guide.
+The default username and password is raspberry/pi, which is assumed to be in use for this guide.
 
-- If you need to install Chromium, run the following command:
+If you need to install Chromium, run the following command:
 {% highlight bash %}
 ~]$ sudo apt install chromium -y
 OR
 ~]$ sudo apt install chromium-browser -y
 {% endhighlight %}
 
-- If the pi is not set to automatically login do the following:
+If the pi is not set to automatically login do the following:
 {% highlight bash %}
 ~]$ sudo raspi-config
 3 Boot Options > B1 Desktop / CLI > B4 Desktop Autologin
 {% endhighlight %}
 
-- An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.
+An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.

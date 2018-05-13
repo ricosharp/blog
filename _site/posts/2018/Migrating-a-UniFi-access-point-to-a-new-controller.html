@@ -9,38 +9,38 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>ScreenCloud Player on a Raspberry Pi - Rico Sharp</title>
-<meta name="description" content="Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot">
+<!-- begin _includes/seo.html --><title>Migrating a UniFi access point to a new controller - Rico Sharp</title>
+<meta name="description" content="How to migrate an existing access point to a new UniFi controller.">
 
 
 
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Rico Sharp">
-<meta property="og:title" content="ScreenCloud Player on a Raspberry Pi">
-<meta property="og:url" content="http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi">
+<meta property="og:title" content="Migrating a UniFi access point to a new controller">
+<meta property="og:url" content="http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller">
 
 
-  <meta property="og:description" content="Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot">
-
-
-
-
-
-
-
-  <meta property="article:published_time" content="2018-05-12T00:00:00-04:00">
+  <meta property="og:description" content="How to migrate an existing access point to a new UniFi controller.">
 
 
 
 
 
-  
+
+
+  <meta property="article:published_time" content="2018-05-13T00:00:00-04:00">
+
+
+
+
 
   
 
+  
 
-<link rel="canonical" href="http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi">
+
+<link rel="canonical" href="http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller">
 
 
 
@@ -262,15 +262,15 @@
 
 
   <article class="page" itemscope itemtype="http://schema.org/CreativeWork">
-    <meta itemprop="headline" content="ScreenCloud Player on a Raspberry Pi">
-    <meta itemprop="description" content="Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot">
-    <meta itemprop="datePublished" content="May 12, 2018">
+    <meta itemprop="headline" content="Migrating a UniFi access point to a new controller">
+    <meta itemprop="description" content="How to migrate an existing access point to a new UniFi controller.">
+    <meta itemprop="datePublished" content="May 13, 2018">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">ScreenCloud Player on a Raspberry Pi
+          <h1 id="page-title" class="page__title" itemprop="headline">Migrating a UniFi access point to a new controller
 </h1>
           
             <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
@@ -286,65 +286,48 @@
 
       <section class="page__content" itemprop="text">
         
-        <p><a href="https://screen.cloud">ScreenCloud</a> is a digital signage solution that is very user friendly. It is simple to configure, and compatible with variety of TV’s and devices.</p>
+        <p>If you have an access point that is already tied to an existing UniFi controller, you can migrate it to a new one without having to physically touch the device.</p>
 
-<p>This guide will go through the process of installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.</p>
+<p>I needed to do this in the past to move a bunch of access points from a failing <a href="https://www.ubnt.com/unifi/unifi-cloud-key/">Cloud Key</a>, and onto a new controller running on a virtual machine.</p>
 
-<h2 id="configuration">Configuration</h2>
+<p>You will need the following:</p>
+<ul>
+  <li>IP address of the access point.</li>
+  <li>Superadmin login of the previous controller.</li>
+</ul>
 
-<p>On a newly installed Raspbian system, download and install all updates, then reboot.</p>
+<p>SSH to the access point. Here you will need to use the superadmin login of the previous controller. Next, note down the MAC address by doing an ifconfig. Then finally, reset the access point to its factory defaults.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>apt update <span class="nt">-y</span>
-~]<span class="nv">$ </span><span class="nb">sudo </span>apt upgrade <span class="nt">-y</span>
-~]<span class="nv">$ </span>reboot</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>ssh ip-or-hostname-of-access-point
+~]<span class="nv">$ </span>ifconfig
+~]<span class="nv">$ </span>syswrapper.sh restore-default</code></pre></figure>
 
-<p>Open Chromium and install the <a href="https://chrome.google.com/webstore/detail/screencloud-digital-signa/efdahhfldoeikfglgolhibmdidbnpneo?hl=en">ScreenCloud Digital Signage Player</a>.</p>
+<p>The access point can take about a minute to reset. Ping it until you receive a reply, so you know when it is ready to be adopted by the new controller.</p>
 
-<p><img src="http://localhost:4000/assets/images/posts/2018/sc-add-to-chrome.png" alt="Add to Chrome" /></p>
+<p>Now tell the access point to talk to the new controller by invoking the set-inform command.</p>
 
-<p><em>Note the app-id in the URL is efdahhfldoeikfglgolhibmdidbnpneo. We will need this later when configuring the application to automatically start on boot.</em></p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>ssh ip-or-hostname-of-access-point
+~]<span class="nv">$ </span>set-inform http://ip-address-or-hostname-of-new-controller:8080/inform</code></pre></figure>
 
-<p>The application will automatically open once it is added to Chromium. Exit full screen by pressing escape on the keyboard and close the application.</p>
+<p>Open a browser and go to <em>http://ip-address-or-hostname-of-new-controller:8080</em></p>
 
-<p>Configure Chromium to automatically start the ScreenCloud Player by editing the autostart file. Also, now is a good time to disable the screensaver.</p>
+<p>Login, go to Devices, then click Adopt on the access point.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>nano /home/pi/.config/lxsession/LXDE-pi/autostart
-
-<span class="c"># Add this line:</span>
-@chromium <span class="nt">--app-id</span><span class="o">=</span>efdahhfldoeikfglgolhibmdidbnpneo <span class="nt">--disable-session-crashed-bubble</span>
-
-<span class="c"># Comment out this line</span>
-<span class="c">#@xscreensaver -no-splash</span></code></pre></figure>
-
-<p>Reboot the system. The pi will automatically login and start the ScreenCloud Player.</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>reboot</code></pre></figure>
+<p>The access point will now be managed by the new controller.</p>
 
 <h2 id="notes">Notes</h2>
 
-<ul>
-  <li>
-    <p>The default username and password is raspberry/pi, which is assumed to be in use for this guide.</p>
-  </li>
-  <li>
-    <p>If you need to install Chromium, run the following command:</p>
-  </li>
-</ul>
+<p>A little bit of test content.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>apt install chromium <span class="nt">-y</span>
+<p>The last time I did this, the access points did not adopt straight away. They would go through the process of adopting, then after five minutes, the status would still say adopting. In this case I had to run the set-inform command again on the access point, then I had the option to adopt again on the controller. The second time around seemed to work.</p>
+
+<p>You can view the logs on the access point with the following commands:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>tail /var/log/messages
 OR
-~]<span class="nv">$ </span><span class="nb">sudo </span>apt install chromium-browser <span class="nt">-y</span></code></pre></figure>
+~]<span class="nv">$ </span>less /var/log/messages</code></pre></figure>
 
-<ul>
-  <li>If the pi is not set to automatically login do the following:</li>
-</ul>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>raspi-config
-3 Boot Options <span class="o">&gt;</span> B1 Desktop / CLI <span class="o">&gt;</span> B4 Desktop Autologin</code></pre></figure>
-
-<ul>
-  <li>An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.</li>
-</ul>
+<p>If you do not have a static IP reservation in DHCP, then the <a href="https://chrome.google.com/webstore/detail/ubiquiti-device-discovery/hmpigflbjeapnknladcfphgkemopofig?hl=en">Ubiquiti Device Discover Tool</a> for Chrome is quite useful for finding the device. You must be on the same LAN as the access point to use this. Run a scan and find the IP address that corresponds to the MAC address from the ifconfig before. You can even use this tool to run the set-inform.</p>
 
         
       </section>
@@ -355,7 +338,7 @@ OR
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-05-12T00:00:00-04:00">May 12, 2018</time></p>
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-05-13T00:00:00-04:00">May 13, 2018</time></p>
         
       </footer>
 
@@ -364,7 +347,7 @@ OR
       
   <nav class="pagination">
     
-      <a href="/2018/My-First-Jekyll-Post" class="pagination--pager" title="My First Jekyll Post
+      <a href="/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi" class="pagination--pager" title="ScreenCloud Player on a Raspberry Pi
 ">Previous</a>
     
     
@@ -392,7 +375,34 @@ OR
     
     <h2 class="archive__item-title" itemprop="headline">
       
-        <a href="/2018/My-First-Jekyll-Post" rel="permalink">My First Jekyll Post
+        <a href="/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi" rel="permalink">ScreenCloud Player on a Raspberry Pi
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.
+</p>
+  </article>
+</div>
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="http://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2018/My-First-Jekyll-Post" rel="permalink">My First Jekyll Post
 </a>
       
     </h2>
@@ -456,8 +466,8 @@ OR
     
   <script>
     var disqus_config = function () {
-      this.page.url = "http://localhost:4000/2018/ScreenCloud-Player-on-a-Raspberry-Pi";  // Replace PAGE_URL with your page's canonical URL variable
-      this.page.identifier = "/2018/ScreenCloud-Player-on-a-Raspberry-Pi"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+      this.page.url = "http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller";  // Replace PAGE_URL with your page's canonical URL variable
+      this.page.identifier = "/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
     (function() { // DON'T EDIT BELOW THIS LINE
       var d = document, s = d.createElement('script');
