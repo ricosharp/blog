@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.16.2 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+--><html lang="en" class="no-js">
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Over the Air TV to IPTV on Raspberry Pi - Rico Sharp</title>
+<meta name="description" content="How to stream free to air television over an IP network">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Rico Sharp">
+<meta property="og:title" content="Over the Air TV to IPTV on Raspberry Pi">
+<meta property="og:url" content="http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi">
+
+
+  <meta property="og:description" content="How to stream free to air television over an IP network">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2019-04-28T00:00:00-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi">
+
+
+
+
+
+
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "",
+      "url": "http://localhost:4000",
+      "sameAs": null
+    }
+  </script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Rico Sharp Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE ]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">Rico Sharp</a>
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+              <a href="/about">About</a>
+            </li>
+<li class="masthead__menu-item">
+              <a href="http://resume.ricosharp.com">Resume</a>
+            </li>
+</ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Rico Sharp" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Rico Sharp</h3>
+    
+    
+      <p class="author__bio" itemprop="description">
+        
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Washington, D.C.</span>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:rico.sharp@gmail.com">
+            <meta itemprop="email" content="rico.sharp@gmail.com">
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/ricosharp" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Over the Air TV to IPTV on Raspberry Pi">
+    <meta itemprop="description" content="How to stream free to air television over an IP network">
+    <meta itemprop="datePublished" content="April 28, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Over the Air TV to IPTV on Raspberry Pi
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  6 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>IPTV is an alternative transport method of broadcasting content, rather than traditional means. Instead of than using coaxial cabling, CAT 5/6 or WiFi might be used instead.</p>
+
+<p>There are three things to consider when implementing IPTV:</p>
+<ul>
+  <li>The source</li>
+  <li>The network</li>
+  <li>The client</li>
+</ul>
+
+<p>The source coming in can be anything -  a coaxial connection from your cable provider or an antenna. It could even be an http(s) stream, YouTube video, or even the HDMI output of an external device. These sources would be connected to a distribution device on one side. The other side of this distribution device will be the network.</p>
+
+<p>You can use unicast addressing to send IPTV over the network. However, unicast traffic is one to one and therefore not scalable in this situation. If five clients are watching the same channel, the same traffic is going over the network five times!</p>
+
+<p>Multicast is a more efficient means of sending this type of data over a network. It can be used to send a single stream of data to multiple clients. If the five clients are watching the same channel, then the source device is only sending the channel once to those five clients.</p>
+
+<p>A multitude of devices can be used to tune into an IPTV channel. This could be something as simple as VLC player to a full set top box solution managed by some type of middleware platform.</p>
+
+<h2 id="equipment">Equipment</h2>
+<p>I’m going to keep things simple and use the following:</p>
+
+<ul>
+  <li>Raspberry Pi 3 Model B+</li>
+  <li>Hauppauge WinTV-dualHD USB Tuner</li>
+</ul>
+
+<p>The distribution device is the Pi. The source is free to air television which I am using a USB TV tuner to access. The Pi’s network port will be connected to my multicast VLAN. I will be accessing these streams from my Macbook Pro using VLC player.</p>
+
+<p>Digital TV transmits more than one channel on a given frequency. So if there are four channels on one frequency and three on the other, you can send out a total of seven channels to your network. I chose this particular USB TV Tuner because it can pick up two frequencies. One of these is not enough to tune into all the channels in my area but it is a good way to start learning about IPTV.</p>
+
+<p>Also, when choosing a tuner, make sure that it is compliant with the standard in your country. Here in the US the standard is ATSC, so the Hauappage USB that I chose supports this. Other countries might use DVD-T, so bare this in mind.</p>
+
+<h2 id="write-raspbian-to-sd-card">Write Raspbian to SD card</h2>
+<p>First let’s put an OS on the Pi. Connect your micro SD card to your computer and identify which disk it is. I’m using a MacBook Pro and the diskutil program.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>diskutil list</code></pre></figure>
+
+<p>You should be able to identify your micro SD card from the output. In my case, this is /dev/disk2.</p>
+
+<p>Next, unmount the disk and write the OS to it. I’m using the current April 2019 Raspbian Stretch Lite with kernel version 4.14. After image has been written to disk, unmount it again and insert the micro SD card into the Pi.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>diskutil unmountdisk /dev/disk2
+~]<span class="nv">$ </span><span class="nb">sudo </span>dd <span class="k">if</span><span class="o">=</span>2019-04-08-raspbian-stretch-lite.img <span class="nv">of</span><span class="o">=</span>/dev/disk2
+~]<span class="nv">$ </span>diskutil unmountdisk /dev/disk2</code></pre></figure>
+
+<h2 id="run-updates-and-upgrade-kernel">Run updates and upgrade kernel</h2>
+<p>Start the Pi and update the system. While we’re at it, let’s enable SSH and reboot to verify it has started.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># update system</span>
+~]<span class="nv">$ </span><span class="nb">sudo </span>apt update <span class="nt">-y</span>
+~]<span class="nv">$ </span><span class="nb">sudo </span>apt upgrade <span class="nt">-y</span>
+<span class="c"># enable SSH</span>
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl <span class="nb">enable </span>ssh
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl start ssh
+~]<span class="nv">$ </span>reboot</code></pre></figure>
+
+<p>At the time of writing, Raspbian Stretch kernel is 4.14. This kernel only supports one of the tuners inside the Hauppauge WinTV-dualHD USB TV tuner out of the box. Kernel version 4.17 added support for both (see <a href="https://www.linuxtv.org/wiki/index.php/ATSC_USB_devices">here</a>). You can update the Pi to 4.19 by issuing the below commands.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># update kernel</span>
+~]<span class="nv">$ </span><span class="nb">sudo </span>rpi-update
+~]<span class="nv">$ </span>reboot</code></pre></figure>
+
+<p>After rebooting, you should see that both tuners are detected.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">ls</span> /dev/dvb
+adapter0  adapter1</code></pre></figure>
+
+<h2 id="install-and-configure-iptv">Install and Configure IPTV</h2>
+<p>Next, install the tools that we need to scan for channels and provide IPTV over the network.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># install IPTV tools</span>
+~]<span class="nv">$ </span><span class="nb">sudo </span>apt install dvb-apps dvblast <span class="nt">-y</span></code></pre></figure>
+
+<p>You can use the scan program included with dvb-apps to scan for free to air channels in your area. A file containing the frequencies to scan is required. The easiest way to perform the scan is to use a file from /usr/share/dvb/dvb-legacy/atsc (assuming you are in an ATSC country) containing predefined frequencies. I will use the us-ATSC-center-frequencies-8VSB file to perform the scan, then output the results to a channels.conf file.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>scan /usr/share/dvb/dvb-legacy/atsc/us-ATSC-center-frequencies-8VSB <span class="o">&gt;</span> channels.conf</code></pre></figure>
+
+<p>This scan will take a while and will come up with a number of “tuning failed” results. This just means that there is nothing broadcasted on this frequency.</p>
+
+<p>You can build your own scan file to reduce the amount of time a scan takes. The <a href="https://antennaweb.org/Address">AntennaWeb</a> site is useful when doing this (US only).</p>
+
+<p>The final channels.conf file will look something like this:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">cat </span>channels.conf
+WJLA-HD:177028615:8VSB:49:52:3
+WJLACHG:177028615:8VSB:65:68:4
+WJLACMT:177028615:8VSB:113:116:5
+WJLATBD:177028615:8VSB:129:132:6
+WUSA-HD:189028615:8VSB:49:52:1
+LATV:189028615:8VSB:65:68:2
+Justice:189028615:8VSB:81:84:3
+WHUT HD:587028615:8VSB:49:52:1
+WHUTKid:587028615:8VSB:65:68:2
+ION:593028615:8VSB:49:52:3
+qubo:593028615:8VSB:65:68:4
+IONLife:593028615:8VSB:81:84:5
+Shop:593028615:8VSB:97:100:6
+HSN:593028615:8VSB:113:116:7
+QVC:593028615:8VSB:129:132:8
+WTTG-DT:605028615:8VSB:49:52:3
+WDCA 20.1:605028615:8VSB:65:68:4
+BUZZR 5.2:605028615:8VSB:81:84:5
+ME TV 5.3:605028615:8VSB:97:100:6
+MOVIES 20.2:605028615:8VSB:113:116:7
+HEROES AND ICONS:605028615:8VSB:129:132:8
+WRC-HD NBC 4 Washington:677028615:8VSB:49:52:3
+COZI TV on WRC-TV:677028615:8VSB:65:68:4
+WZDC   :677028615:8VSB:81:84:5
+XITOS  :677028615:8VSB:97:100:6</code></pre></figure>
+
+<p>The channels.conf file can be opened with VLC player to start watching television. However, our goal is to  multicast these channels over a network.</p>
+
+<p>If you look closely at the channels.conf file, you will see that there are a bunch of different values. The first is the channel name, followed by the frequency, modulation, video PID, audio PID, and SID. You will notice that certain channels have the same frequency. If we pick the 177028615 frequency as an example, we can see four channels. Looking further down at 677028615 we can also see another four channels. Remember that Hauppauge TV tuner has two adapters? This means that one adapter can be configured to sit on the 177028615 frequency and the other on 677028615. The end result all eight channels can be transmitted to the multicast network.</p>
+
+<p><a href="https://www.videolan.org/projects/dvblast.html">DVBlast</a> will be used to multicast the channels. We need to setup a <a href="https://github.com/gfto/dvblast/blob/master/README">config file</a> containing the multicast groups. To transmit the eight channels on 177028615 and 677028615, two separate config files need to be created:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>vi tuner0.conf
+<span class="c"># Tuner 1 - Frequency 177028615</span>
+239.255.0.1:10000   1   3
+239.255.0.2:10000   1   4
+239.255.0.3:10000   1   5
+239.255.0.4:10000   1   6</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>vi tuner1.conf
+<span class="c"># Tuner 2 - Frequency 677028615</span>
+239.255.0.5:10000   1   3
+239.255.0.6:10000   1   4
+239.255.0.7:10000   1   5
+239.255.0.8:10000   1   6</code></pre></figure>
+
+<p>Run dvblast to multicast the channels out on the network</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>dvblast <span class="nt">-a</span> 0 <span class="nt">-f</span> 177028615 <span class="nt">-c</span> tuner0.conf <span class="nt">-e</span> <span class="nt">-m</span> VSB_8  &amp;
+~]<span class="nv">$ </span>dvblast <span class="nt">-a</span> 1 <span class="nt">-f</span> 677028615 <span class="nt">-c</span> tuner1.conf <span class="nt">-e</span> <span class="nt">-m</span> VSB_8 &amp;</code></pre></figure>
+
+<p>On another computer, run VLC Player and enter open one of the streams. On my Macbook Pro I do this through File &gt; Open Network, then enter one of the streams (e.g. rtp://239.255.0.1:10000)</p>
+
+<p>You can use something like minisapserver to broadcast the channels to VLC Player using SAP so you don’t need to add enter the multicast addresses each time. I’ll write about this at a later time.</p>
+
+<h2 id="references">References</h2>
+<p>The videos and webpages below were essential references when getting this up and running:</p>
+<ol>
+  <li><a href="https://www.youtube.com/watch?v=KI0LuIcFM98">CWNE88 Youtube - Raspberry Pi Multicast TV server</a></li>
+  <li><a href="https://www.linuxtv.org/wiki/index.php/Hauppauge_WinTV-dualHD">Linux TV - Hauppauge WinTV dual HD</a></li>
+  <li><a href="https://github.com/gfto/dvblast/blob/master/README">DVBlast Config File</a></li>
+</ol>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-04-28T00:00:00-04:00">April 28, 2019</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller" class="pagination--pager" title="Migrating a UniFi access point to a new controller
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller" rel="permalink">Migrating a UniFi access point to a new controller
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to migrate an existing access point to a new UniFi controller.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi" rel="permalink">ScreenCloud Player on a Raspberry Pi
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2018/My-First-Jekyll-Post" rel="permalink">My First Jekyll Post
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  less than 1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Hello World!
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">© 2019 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js" integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
