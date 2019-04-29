@@ -15,7 +15,7 @@ var store = [{
         "url": "http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller",
         "teaser":null},{
         "title": "Over the Air TV to IPTV on Raspberry Pi",
-        "excerpt":"IPTV is an alternative transport method of broadcasting content, rather than traditional means. Instead of than using coaxial cabling, CAT 5/6 or WiFi might be used instead. There are three things to consider when implementing IPTV: The source The network The client The source coming in can be anything -...","categories": [],
+        "excerpt":"IPTV is an alternative transport method for broadcasting content, rather than traditional means. Instead of than using coaxial cabling, CAT 5/6 or WiFi might be used instead. There are three things to consider when implementing IPTV: The source The network The client The source coming in can be anything from...","categories": [],
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi",
         "teaser":null}]

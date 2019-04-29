@@ -3,14 +3,14 @@ title: "Over the Air TV to IPTV on Raspberry Pi"
 excerpt: "How to stream free to air television over an IP network"
 ---
 
-IPTV is an alternative transport method of broadcasting content, rather than traditional means. Instead of than using coaxial cabling, CAT 5/6 or WiFi might be used instead.
+IPTV is an alternative transport method for broadcasting content, rather than traditional means. Instead of than using coaxial cabling, CAT 5/6 or WiFi might be used instead.
 
 There are three things to consider when implementing IPTV:
 - The source
 - The network
 - The client
 
-The source coming in can be anything -  a coaxial connection from your cable provider or an antenna. It could even be an http(s) stream, YouTube video, or even the HDMI output of an external device. These sources would be connected to a distribution device on one side. The other side of this distribution device will be the network.
+The source coming in can be anything from a coaxial connection from your cable provider to an antenna. It could even be an http(s) stream, YouTube video, or even the HDMI output of an external device. These sources would be connected to a distribution device on one side. The other side of this distribution device will be the network.
 
 You can use unicast addressing to send IPTV over the network. However, unicast traffic is one to one and therefore not scalable in this situation. If five clients are watching the same channel, the same traffic is going over the network five times!
 
@@ -27,9 +27,9 @@ I'm going to keep things simple and use the following:
 
 The distribution device is the Pi. The source is free to air television which I am using a USB TV tuner to access. The Pi's network port will be connected to my multicast VLAN. I will be accessing these streams from my Macbook Pro using VLC player.
 
-Digital TV transmits more than one channel on a given frequency. So if there are four channels on one frequency and three on the other, you can send out a total of seven channels to your network. I chose this particular USB TV Tuner because it can pick up two frequencies. One of these is not enough to tune into all the channels in my area but it is a good way to start learning about IPTV.
+Digital TV transmits more than one channel on a given frequency. So if there are four channels on one frequency and three on the other, you can send out a total of seven channels to your network. I chose this particular USB TV Tuner because it can pick up two frequencies. One of these is not enough to tune into all the channels in my area. But it is a great device to start learning about IPTV implementation.
 
-Also, when choosing a tuner, make sure that it is compliant with the standard in your country. Here in the US the standard is ATSC, so the Hauappage USB that I chose supports this. Other countries might use DVD-T, so bare this in mind.
+When choosing a tuner, make sure that it is compliant with the standard in your country. Here in the US the standard is ATSC, so the Hauappage USB that I chose supports this. Other countries might use DVD-T, so bare this in mind.
 
 ## Write Raspbian to SD card
 First let’s put an OS on the Pi. Connect your micro SD card to your computer and identify which disk it is. I’m using a MacBook Pro and the diskutil program.
@@ -40,7 +40,7 @@ First let’s put an OS on the Pi. Connect your micro SD card to your computer a
 
 You should be able to identify your micro SD card from the output. In my case, this is /dev/disk2.
 
-Next, unmount the disk and write the OS to it. I’m using the current April 2019 Raspbian Stretch Lite with kernel version 4.14. After image has been written to disk, unmount it again and insert the micro SD card into the Pi.
+Next, unmount the disk and write the OS to it. I’m using the current April 2019 Raspbian Stretch Lite with kernel version 4.14. After the image has been written to disk, unmount it again and insert the micro SD card into the Pi.
 
 {% highlight bash %}
 ~]$ diskutil unmountdisk /dev/disk2
@@ -61,7 +61,7 @@ Start the Pi and update the system. While we’re at it, let’s enable SSH and 
 ~]$ reboot
 {% endhighlight %}
 
-At the time of writing, Raspbian Stretch kernel is 4.14. This kernel only supports one of the tuners inside the Hauppauge WinTV-dualHD USB TV tuner out of the box. Kernel version 4.17 added support for both (see [here](https://www.linuxtv.org/wiki/index.php/ATSC_USB_devices)). You can update the Pi to 4.19 by issuing the below commands.
+At the time of writing, the Raspbian Stretch kernel is 4.14. This kernel only supports one of the tuners inside the Hauppauge WinTV-dualHD USB TV tuner straight out of the box. Kernel version 4.17 added support for both (see [here](https://www.linuxtv.org/wiki/index.php/ATSC_USB_devices)). You can update the Pi to 4.19 by issuing the below commands.
 
 {% highlight bash %}
 # update kernel
@@ -127,7 +127,7 @@ XITOS  :677028615:8VSB:97:100:6
 
 The channels.conf file can be opened with VLC player to start watching television. However, our goal is to  multicast these channels over a network.
 
-If you look closely at the channels.conf file, you will see that there are a bunch of different values. The first is the channel name, followed by the frequency, modulation, video PID, audio PID, and SID. You will notice that certain channels have the same frequency. If we pick the 177028615 frequency as an example, we can see four channels. Looking further down at 677028615 we can also see another four channels. Remember that Hauppauge TV tuner has two adapters? This means that one adapter can be configured to sit on the 177028615 frequency and the other on 677028615. The end result all eight channels can be transmitted to the multicast network.
+If you look closely at the channels.conf file, you will see that there are a bunch of different values. The first is the channel name, followed by the frequency, modulation, video PID, audio PID, and SID. You will notice that certain channels have the same frequency. If we pick the 177028615 frequency as an example, we can see four channels. Looking further down at 677028615 we can also see another four channels. Remember that the Hauppauge TV tuner has two adapters? This means that one adapter can be configured to sit on the 177028615 frequency and the other on 677028615. The end result is all eight channels can be transmitted to the multicast network.
 
 [DVBlast](https://www.videolan.org/projects/dvblast.html) will be used to multicast the channels. We need to setup a [config file](https://github.com/gfto/dvblast/blob/master/README) containing the multicast groups. To transmit the eight channels on 177028615 and 677028615, two separate config files need to be created:
 
@@ -156,7 +156,7 @@ Run dvblast to multicast the channels out on the network
 ~]$ dvblast -a 1 -f 677028615 -c tuner1.conf -e -m VSB_8 &
 {% endhighlight %}
 
-On another computer, run VLC Player and enter open one of the streams. On my Macbook Pro I do this through File > Open Network, then enter one of the streams (e.g. rtp://239.255.0.1:10000)
+On another computer, use VLC Player to open one of the streams. On my Macbook Pro I do this through File > Open Network, then enter one of the multicast addresses (e.g. rtp://239.255.0.1:10000)
 
 You can use something like minisapserver to broadcast the channels to VLC Player using SAP so you don't need to add enter the multicast addresses each time. I'll write about this at a later time.
 
