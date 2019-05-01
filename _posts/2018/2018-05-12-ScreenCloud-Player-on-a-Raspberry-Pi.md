@@ -41,7 +41,7 @@ Reboot the system. The pi will automatically login and start the ScreenCloud Pla
 
 ## Notes
 
-The default username and password is raspberry/pi, which is assumed to be in use for this guide.
+The default username and password is pi/raspberry, which is assumed to be in use for this guide.
 
 If you need to install Chromium, run the following command:
 {% highlight bash %}

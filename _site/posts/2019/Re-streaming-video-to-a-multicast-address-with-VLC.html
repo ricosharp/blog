@@ -9,38 +9,38 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Migrating a UniFi access point to a new controller - Rico Sharp</title>
-<meta name="description" content="How to migrate an existing access point to a new UniFi controller.">
+<!-- begin _includes/seo.html --><title>Re-streaming video to a multicast address with VLC - Rico Sharp</title>
+<meta name="description" content="How to stream just about anything to a multicast address using VLC">
 
 
 
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Rico Sharp">
-<meta property="og:title" content="Migrating a UniFi access point to a new controller">
-<meta property="og:url" content="http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller">
+<meta property="og:title" content="Re-streaming video to a multicast address with VLC">
+<meta property="og:url" content="http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC">
 
 
-  <meta property="og:description" content="How to migrate an existing access point to a new UniFi controller.">
-
-
-
-
-
-
-
-  <meta property="article:published_time" content="2018-05-13T00:00:00-04:00">
+  <meta property="og:description" content="How to stream just about anything to a multicast address using VLC">
 
 
 
 
 
-  
+
+
+  <meta property="article:published_time" content="2019-04-30T00:00:00-04:00">
+
+
+
+
 
   
 
+  
 
-<link rel="canonical" href="http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller">
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC">
 
 
 
@@ -257,15 +257,15 @@
 
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Migrating a UniFi access point to a new controller">
-    <meta itemprop="description" content="How to migrate an existing access point to a new UniFi controller.">
-    <meta itemprop="datePublished" content="May 13, 2018">
+    <meta itemprop="headline" content="Re-streaming video to a multicast address with VLC">
+    <meta itemprop="description" content="How to stream just about anything to a multicast address using VLC">
+    <meta itemprop="datePublished" content="April 30, 2019">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">Migrating a UniFi access point to a new controller
+          <h1 id="page-title" class="page__title" itemprop="headline">Re-streaming video to a multicast address with VLC
 </h1>
           
             <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
@@ -273,7 +273,7 @@
 
 
 
-  1 minute read
+  3 minute read
 </p>
           
         </header>
@@ -281,46 +281,62 @@
 
       <section class="page__content" itemprop="text">
         
-        <p>If you have an access point that is already tied to an existing UniFi controller, you can migrate it to a new one without having to physically touch the device.</p>
+        <p><a href="https://www.videolan.org">VLC</a> is such a powerful tool. Excuse my ignorance but I have always seen it as just a media player that can play anything I throw at it. But it is capable of so much more!</p>
 
-<p>I needed to do this in the past to move a bunch of access points from a failing <a href="https://www.ubnt.com/unifi/unifi-cloud-key/">Cloud Key</a>, and onto a new controller running on a virtual machine.</p>
+<p>Ever since coming across <a href="https://www.videolan.org/projects/dvblast.html">dvblast</a>, which turns out to be a VLC project, I’ve started asking myself how other content could be multicasted over an IP network. Take the <a href="https://www.abc.net.au/news/newschannel/">ABC News</a> television stream from Australia as an example. Is it possible to re-stream this to a multicast group? The answer is yes and VLC is the tool to use.</p>
 
-<p>You will need the following:</p>
+<h2 id="find-the-stream-link">Find the stream link</h2>
+<p>The first thing to do is to find the streaming link. There are two ways to go about doing this; the easy way and the slightly more difficult way where you may have to get creative. However, the latter method is the one that will always yield a result.</p>
+
+<p>First, open the source code of the page (In Chrome, CMD + OPTION U on a Mac, or CTRL + U on Windows and Linux). Search for “m3u8”. If something comes up then great! The ABC News stream happens to have this hidden in the source code. However, not all streaming sites will do this.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/abc-stream-url.png" alt="ABC Stream URL" /></p>
+
+<p>My preference is to use this second method as the m3u8 file will often point to the specific stream quality. Rather than opening the source code, load the page and where possible, do not play the stream yet. Open the Developer Tools and click on the Network tab (In Chrome, CMD + OPTION + I on Mac, or CTRL + SHIFT + I on Windows and Linux). Here’s where you need to get a little creative and know what to look for. What I tend to do is press the clear button, quickly start and pause the stream and look for “index.m3u8” or “master.m3u8” files.</p>
+
+<p>In the case of the ABC News Channel, the index.m3u8 file is actually loaded into the page before the video is played. If you mess around with changing the quality, you will find that the index_1.m3u8 file is the one that references the 576p quality stream. Right click on this, select copy and copy link address.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/stream-developer-tools.png" alt="Stream Developer Tools" /></p>
+
+<p>Now that we have the stream URL you should test that this is in fact the network stream by using VLC. Go to Media, Open Network Stream, paste the URL and click Play. If your video starts, then you are good to go onto the next steps. Otherwise you will need to keep looking for the stream link.</p>
+
+<h2 id="streaming-to-multicast-with-vlc">Streaming to multicast with VLC</h2>
+
+<p>This can be done in two ways - through the GUI or using the command line.</p>
+
+<h3 id="gui">GUI</h3>
+<p>I start the stream with the GUI so that I know the parameters to issue to the command line</p>
+
 <ul>
-  <li>IP address of the access point.</li>
-  <li>Superadmin login of the previous controller.</li>
+  <li>Media &gt; Stream</li>
+  <li>Click on the Network Tab (as you can see from the other tabs, VLC can also stream a file, disc, or capture device such as a TV tuner)</li>
+  <li>Paste the URL and click Stream</li>
+  <li>Click Next</li>
+  <li>Select RTP/MPEG Transport Stream from the dropdown and click Add</li>
+  <li>Enter your multicast address and port (e.g 239.255.0.1, 10000) and click Next</li>
+  <li>Select your Transcoding Profile. I uncheck this as I don’t want to transcode into another format</li>
+  <li>Make sure Stream all elementary streams is unchecked and click stream. Here you will notice that a generated stream output string is shown. This is very useful when writing out the command line version of this
+<img src="http://localhost:4000/assets/images/posts/2019/vlc-stream-output-string.png" alt="VLC Output String" /></li>
 </ul>
 
-<p>SSH to the access point. Here you will need to use the superadmin login of the previous controller. Next, note down the MAC address by doing an ifconfig. Then finally, reset the access point to its factory defaults.</p>
+<p>Your video will now be streaming to the multicast group you specified. You can open it in VLC on another computer through Media &gt; Open Network Stream. Enter your multicast address (e.g. rtp://239.255.0.1:10000) and click play.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>ssh ip-or-hostname-of-access-point
-~]<span class="nv">$ </span>ifconfig
-~]<span class="nv">$ </span>syswrapper.sh restore-default</code></pre></figure>
+<h3 id="command-line">Command Line</h3>
 
-<p>The access point can take about a minute to reset. Ping it until you receive a reply, so you know when it is ready to be adopted by the new controller.</p>
+<p>On a Linux machine, you can run VLC through the command line. This is useful if you want to run the stream from a central server that you will not be viewing the video from.</p>
 
-<p>Now tell the access point to talk to the new controller by invoking the set-inform command.</p>
+<p>You can install vlc-nox which is basically VLC without the GUI. With a slight modification to the stream output string in the image above, we can run the same stream created through the GUI in the command line instead.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>ssh ip-or-hostname-of-access-point
-~]<span class="nv">$ </span>set-inform http://ip-address-or-hostname-of-new-controller:8080/inform</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># Install VLC without a GUI</span>
+~]<span class="nv">$ </span><span class="nb">sudo </span>apt install vlc-nox
+<span class="c"># Send stream to multicast group</span>
+~]<span class="nv">$ </span>vlc &lt;stream_url&gt; <span class="s1">'#rtp{dst=10.24.5.240,port=10000,mux=ts}'</span> <span class="nt">--no-sout-all</span> <span class="nt">--sout-keep</span></code></pre></figure>
 
-<p>Open a browser and go to <em>http://ip-address-or-hostname-of-new-controller:8080</em></p>
+<p>The video will now begin multicasting to your group. You can open it through Media &gt; Open Network Stream. Enter your multicast address (e.g. rtp://239.255.0.1:10000) and click play.</p>
 
-<p>Login, go to Devices, then click Adopt on the access point.</p>
+<h2 id="references">References</h2>
+<p><a href="https://wiki.videolan.org/Documentation:Streaming_HowTo/Advanced_Streaming_Using_the_Command_Line/#rtp">VLC - Streaming HowTo/Advanced Streaming Using the Command Line</a></p>
 
-<p>The access point will now be managed by the new controller.</p>
-
-<h2 id="notes">Notes</h2>
-
-<p>The last time I did this, the access points did not adopt straight away. They would go through the process of adopting, then after five minutes, the status would still say adopting. In this case I had to run the set-inform command again on the access point, then I had the option to adopt again on the controller. The second time around seemed to work.</p>
-
-<p>You can view the logs on the access point with the following commands:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>tail /var/log/messages
-OR
-~]<span class="nv">$ </span>less /var/log/messages</code></pre></figure>
-
-<p>If you do not have a static IP reservation in DHCP, then the <a href="https://chrome.google.com/webstore/detail/ubiquiti-device-discovery/hmpigflbjeapnknladcfphgkemopofig?hl=en">Ubiquiti Device Discover Tool</a> for Chrome is quite useful for finding the device. You must be on the same LAN as the access point to use this. Run a scan and find the IP address that corresponds to the MAC address from the ifconfig before. You can even use this tool to run the set-inform.</p>
 
         
       </section>
@@ -331,7 +347,7 @@ OR
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-05-13T00:00:00-04:00">May 13, 2018</time></p>
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-04-30T00:00:00-04:00">April 30, 2019</time></p>
         
       </footer>
 
@@ -340,12 +356,11 @@ OR
       
   <nav class="pagination">
     
-      <a href="/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi" class="pagination--pager" title="ScreenCloud Player on a Raspberry Pi
+      <a href="/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi" class="pagination--pager" title="Over the Air TV to IPTV on Raspberry Pi
 ">Previous</a>
     
     
-      <a href="/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi" class="pagination--pager" title="Over the Air TV to IPTV on Raspberry Pi
-">Next</a>
+      <a href="#" class="pagination--pager disabled">Next</a>
     
   </nav>
 
@@ -359,34 +374,6 @@ OR
     <div class="page__related">
       <h4 class="page__related-title">You May Also Enjoy</h4>
       <div class="grid__wrapper">
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC" rel="permalink">Re-streaming video to a multicast address with VLC
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  3 minute read
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">How to stream just about anything to a multicast address using VLC
-</p>
-  </article>
-</div>
-
         
           
 
@@ -411,6 +398,34 @@ OR
 </p>
     
     <p class="archive__item-excerpt" itemprop="description">How to stream free to air television over an IP network
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller" rel="permalink">Migrating a UniFi access point to a new controller
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to migrate an existing access point to a new UniFi controller.
 </p>
   </article>
 </div>

@@ -1,4 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-04-28T20:27:45-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Over the Air TV to IPTV on Raspberry Pi</title><link href="http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi" rel="alternate" type="text/html" title="Over the Air TV to IPTV on Raspberry Pi" /><published>2019-04-28T00:00:00-04:00</published><updated>2019-04-28T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi</id><content type="html" xml:base="http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi">&lt;p&gt;IPTV is an alternative transport method for broadcasting content, rather than traditional means. Instead of than using coaxial cabling, CAT 5/6 or WiFi might be used instead.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-04-30T22:12:38-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Re-streaming video to a multicast address with VLC</title><link href="http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC" rel="alternate" type="text/html" title="Re-streaming video to a multicast address with VLC" /><published>2019-04-30T00:00:00-04:00</published><updated>2019-04-30T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC</id><content type="html" xml:base="http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC">&lt;p&gt;&lt;a href=&quot;https://www.videolan.org&quot;&gt;VLC&lt;/a&gt; is such a powerful tool. Excuse my ignorance but I have always seen it as just a media player that can play anything I throw at it. But it is capable of so much more!&lt;/p&gt;
+
+&lt;p&gt;Ever since coming across &lt;a href=&quot;https://www.videolan.org/projects/dvblast.html&quot;&gt;dvblast&lt;/a&gt;, which turns out to be a VLC project, I’ve started asking myself how other content could be multicasted over an IP network. Take the &lt;a href=&quot;https://www.abc.net.au/news/newschannel/&quot;&gt;ABC News&lt;/a&gt; television stream from Australia as an example. Is it possible to re-stream this to a multicast group? The answer is yes and VLC is the tool to use.&lt;/p&gt;
+
+&lt;h2 id=&quot;find-the-stream-link&quot;&gt;Find the stream link&lt;/h2&gt;
+&lt;p&gt;The first thing to do is to find the streaming link. There are two ways to go about doing this; the easy way and the slightly more difficult way where you may have to get creative. However, the latter method is the one that will always yield a result.&lt;/p&gt;
+
+&lt;p&gt;First, open the source code of the page (In Chrome, CMD + OPTION U on a Mac, or CTRL + U on Windows and Linux). Search for “m3u8”. If something comes up then great! The ABC News stream happens to have this hidden in the source code. However, not all streaming sites will do this.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/abc-stream-url.png&quot; alt=&quot;ABC Stream URL&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;My preference is to use this second method as the m3u8 file will often point to the specific stream quality. Rather than opening the source code, load the page and where possible, do not play the stream yet. Open the Developer Tools and click on the Network tab (In Chrome, CMD + OPTION + I on Mac, or CTRL + SHIFT + I on Windows and Linux). Here’s where you need to get a little creative and know what to look for. What I tend to do is press the clear button, quickly start and pause the stream and look for “index.m3u8” or “master.m3u8” files.&lt;/p&gt;
+
+&lt;p&gt;In the case of the ABC News Channel, the index.m3u8 file is actually loaded into the page before the video is played. If you mess around with changing the quality, you will find that the index_1.m3u8 file is the one that references the 576p quality stream. Right click on this, select copy and copy link address.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/stream-developer-tools.png&quot; alt=&quot;Stream Developer Tools&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now that we have the stream URL you should test that this is in fact the network stream by using VLC. Go to Media, Open Network Stream, paste the URL and click Play. If your video starts, then you are good to go onto the next steps. Otherwise you will need to keep looking for the stream link.&lt;/p&gt;
+
+&lt;h2 id=&quot;streaming-to-multicast-with-vlc&quot;&gt;Streaming to multicast with VLC&lt;/h2&gt;
+
+&lt;p&gt;This can be done in two ways - through the GUI or using the command line.&lt;/p&gt;
+
+&lt;h3 id=&quot;gui&quot;&gt;GUI&lt;/h3&gt;
+&lt;p&gt;I start the stream with the GUI so that I know the parameters to issue to the command line&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Media &amp;gt; Stream&lt;/li&gt;
+  &lt;li&gt;Click on the Network Tab (as you can see from the other tabs, VLC can also stream a file, disc, or capture device such as a TV tuner)&lt;/li&gt;
+  &lt;li&gt;Paste the URL and click Stream&lt;/li&gt;
+  &lt;li&gt;Click Next&lt;/li&gt;
+  &lt;li&gt;Select RTP/MPEG Transport Stream from the dropdown and click Add&lt;/li&gt;
+  &lt;li&gt;Enter your multicast address and port (e.g 239.255.0.1, 10000) and click Next&lt;/li&gt;
+  &lt;li&gt;Select your Transcoding Profile. I uncheck this as I don’t want to transcode into another format&lt;/li&gt;
+  &lt;li&gt;Make sure Stream all elementary streams is unchecked and click stream. Here you will notice that a generated stream output string is shown. This is very useful when writing out the command line version of this
+&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/vlc-stream-output-string.png&quot; alt=&quot;VLC Output String&quot; /&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Your video will now be streaming to the multicast group you specified. You can open it in VLC on another computer through Media &amp;gt; Open Network Stream. Enter your multicast address (e.g. rtp://239.255.0.1:10000) and click play.&lt;/p&gt;
+
+&lt;h3 id=&quot;command-line&quot;&gt;Command Line&lt;/h3&gt;
+
+&lt;p&gt;On a Linux machine, you can run VLC through the command line. This is useful if you want to run the stream from a central server that you will not be viewing the video from.&lt;/p&gt;
+
+&lt;p&gt;You can install vlc-nox which is basically VLC without the GUI. With a slight modification to the stream output string in the image above, we can run the same stream created through the GUI in the command line instead.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Install VLC without a GUI&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt install vlc-nox
+&lt;span class=&quot;c&quot;&gt;# Send stream to multicast group&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vlc &amp;lt;stream_url&amp;gt; &lt;span class=&quot;s1&quot;&gt;'#rtp{dst=10.24.5.240,port=10000,mux=ts}'&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--no-sout-all&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--sout-keep&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The video will now begin multicasting to your group. You can open it through Media &amp;gt; Open Network Stream. Enter your multicast address (e.g. rtp://239.255.0.1:10000) and click play.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://wiki.videolan.org/Documentation:Streaming_HowTo/Advanced_Streaming_Using_the_Command_Line/#rtp&quot;&gt;VLC - Streaming HowTo/Advanced Streaming Using the Command Line&lt;/a&gt;&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to stream just about anything to a multicast address using VLC</summary></entry><entry><title type="html">Over the Air TV to IPTV on Raspberry Pi</title><link href="http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi" rel="alternate" type="text/html" title="Over the Air TV to IPTV on Raspberry Pi" /><published>2019-04-28T00:00:00-04:00</published><updated>2019-04-28T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi</id><content type="html" xml:base="http://localhost:4000/posts/2019/Over-the-Air-to-IPTV-on-Raspberry-Pi">&lt;p&gt;IPTV is an alternative transport method for broadcasting content, rather than traditional means. Instead of than using coaxial cabling, CAT 5/6 or WiFi might be used instead.&lt;/p&gt;
 
 &lt;p&gt;There are three things to consider when implementing IPTV:&lt;/p&gt;
 &lt;ul&gt;
@@ -217,7 +271,7 @@ OR
 
 &lt;h2 id=&quot;notes&quot;&gt;Notes&lt;/h2&gt;
 
-&lt;p&gt;The default username and password is raspberry/pi, which is assumed to be in use for this guide.&lt;/p&gt;
+&lt;p&gt;The default username and password is pi/raspberry, which is assumed to be in use for this guide.&lt;/p&gt;
 
 &lt;p&gt;If you need to install Chromium, run the following command:&lt;/p&gt;
 
