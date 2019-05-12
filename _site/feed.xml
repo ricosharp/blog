@@ -1,4 +1,93 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-11T22:32:06-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Ubuntu Customization</title><link href="http://localhost:4000/posts/2019/Ubuntu-Customization" rel="alternate" type="text/html" title="Ubuntu Customization" /><published>2019-05-11T00:00:00-04:00</published><updated>2019-05-11T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Ubuntu-Customization</id><content type="html" xml:base="http://localhost:4000/posts/2019/Ubuntu-Customization">&lt;p&gt;Below is a script that I run after installing Ubuntu. It installs a couple of extra packages that I need and pins my favourite programs to the dash.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-12T16:31:48-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Private VLAN’s on a Cisco switch</title><link href="http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch" rel="alternate" type="text/html" title="Private VLAN's on a Cisco switch" /><published>2019-05-12T00:00:00-04:00</published><updated>2019-05-12T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch</id><content type="html" xml:base="http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch">&lt;p&gt;All hosts in an a broadcast domain can communicate with each other. For example, Figure 1 below shows 5 PC’s connected to a single switch, each configured with an IP address on the same subnet. If PC-1 was to ping PC-5, it will send an ARP request first, flooding the network and reaching all hosts. PC-5 will respond with an ARP reply and ICMP traffic will then be able to flow between hosts.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/private-vlans.png&quot; alt=&quot;Private VLAN Topology&quot; /&gt;
+&lt;em&gt;Figure 1: Private VLAN topology&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;But what if we wanted to stop PC-1 from communicating with PC-5, without creating additional subnets? Private VLANs can be set up for this purpose. When configured correctly, a private VLAN can segregate a VLAN so that some hosts can communicate with each other, whilst others cannot, even though all hosts are on same subnet sharing the same gateway.&lt;/p&gt;
+
+&lt;p&gt;When configuring private VLAN’s, a primary VLAN is configured first. Secondary VLAN’s are then associated with it.&lt;/p&gt;
+
+&lt;p&gt;Each secondary VLAN can be set up as community VLAN, or an isolated VLAN. In a community VLAN, all hosts in that community VLAN can communicate with each other. Hosts in an isolated VLAN cannot communicate with any other host.&lt;/p&gt;
+
+&lt;p&gt;The only exception to this rule is when a port is set up in promiscuous mode. A host connected a promiscuous port can communicate with all secondary VLANs. This is mainly reserved for devices such as routers, which would be the gateway of all the clients.&lt;/p&gt;
+
+&lt;h2 id=&quot;configuration&quot;&gt;Configuration&lt;/h2&gt;
+
+&lt;p&gt;In Figure 1, PC-1 and PC-2 are in a community VLAN, so both PC’s can communicate with each other. They can also communicate with R1, because R1 is connected to a port in promiscous mode. However, they cannot communicate with any other host (PC-3, PC-4, PC-5).&lt;/p&gt;
+
+&lt;p&gt;PC-4 and PC-5 are also in a community VLAN, but a different one than that of PC-1 and PC-2. They too can communcate with R1 but not to any other host (PC-1, PC-2, PC-3).&lt;/p&gt;
+
+&lt;p&gt;PC-3 is in an isolated VLAN. It cannot communicate with any other host, except for R1.&lt;/p&gt;
+
+&lt;h3 id=&quot;pc-1&quot;&gt;PC-1&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ip 10.1.1.2 /24
+save&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;pc-2&quot;&gt;PC-2&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ip 10.1.1.3 /24
+save&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;pc-3&quot;&gt;PC-3&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ip 10.1.1.4 /24
+save&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;pc-4&quot;&gt;PC-4&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ip 10.1.1.5 /24
+save&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;pc-5&quot;&gt;PC-5&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ip 10.1.1.6 /24
+save&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;sw1&quot;&gt;SW1&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;vlan 10
+private-vlan community
+
+vlan 20
+private-vlan isolated
+
+vlan 30
+private-vlan community
+
+vlan 100
+private-vlan primary
+private-vlan association 10,20,30
+
+interface range g0/0-1
+switchport mode private-vlan host
+switchport private-vlan association host 100 10
+
+interface g0/2
+switchport mode private-vlan host
+switchport private-vlan association host 100 20
+
+interface range g0/3,g1/0
+switchport mode private-vlan host
+switchport private-vlan association host 100 30
+
+interface g3/3
+switchport mode private-vlan promiscuous
+switchport private-vlan mapping 100 10,20,30
+
+end
+
+write memory&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;r1&quot;&gt;R1&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;interface f0/0
+ip address 10.1.1.1 255.255.255.0
+no shutdown
+
+end
+
+write memory&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to configure Private VLAN's on a Cisco switch</summary></entry><entry><title type="html">Ubuntu Customization</title><link href="http://localhost:4000/posts/2019/Ubuntu-Customization" rel="alternate" type="text/html" title="Ubuntu Customization" /><published>2019-05-11T00:00:00-04:00</published><updated>2019-05-11T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Ubuntu-Customization</id><content type="html" xml:base="http://localhost:4000/posts/2019/Ubuntu-Customization">&lt;p&gt;Below is a script that I run after installing Ubuntu. It installs a couple of extra packages that I need and pins my favourite programs to the dash.&lt;/p&gt;
 
 &lt;script src=&quot;https://gist.github.com/ricosharp/35fbf54c13e4d7614b1e4601998257a3.js&quot;&gt;&lt;/script&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A script I use to customize my Ubuntu 18.04 environment</summary></entry><entry><title type="html">Re-streaming video to a multicast address with VLC</title><link href="http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC" rel="alternate" type="text/html" title="Re-streaming video to a multicast address with VLC" /><published>2019-04-30T00:00:00-04:00</published><updated>2019-04-30T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC</id><content type="html" xml:base="http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC">&lt;p&gt;&lt;a href=&quot;https://www.videolan.org&quot;&gt;VLC&lt;/a&gt; is such a powerful tool. Excuse my ignorance but I have always seen it as just a media player that can play anything I throw at it. But it is capable of so much more!&lt;/p&gt;
 

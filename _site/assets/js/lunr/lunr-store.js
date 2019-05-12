@@ -28,4 +28,9 @@ var store = [{
         "excerpt":"Below is a script that I run after installing Ubuntu. It installs a couple of extra packages that I need and pins my favourite programs to the dash.     ","categories": [],
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Ubuntu-Customization",
+        "teaser":null},{
+        "title": "Private VLAN's on a Cisco switch",
+        "excerpt":"All hosts in an a broadcast domain can communicate with each other. For example, Figure 1 below shows 5 PC’s connected to a single switch, each configured with an IP address on the same subnet. If PC-1 was to ping PC-5, it will send an ARP request first, flooding the...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch",
         "teaser":null}]
