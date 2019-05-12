@@ -23,4 +23,9 @@ var store = [{
         "excerpt":"VLC is such a powerful tool. Excuse my ignorance but I have always seen it as just a media player that can play anything I throw at it. But it is capable of so much more! Ever since coming across dvblast, which turns out to be a VLC project, I’ve...","categories": [],
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC",
+        "teaser":null},{
+        "title": "Ubuntu Customization",
+        "excerpt":"Below is a script that I run after installing Ubuntu. It installs a couple of extra packages that I need and pins my favourite programs to the dash.     ","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Ubuntu-Customization",
         "teaser":null}]
