@@ -21,8 +21,12 @@
 <lastmod>2019-04-30T00:00:00-04:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:4000/posts/2019/Ubuntu-Customization</loc>
+<loc>http://localhost:4000/posts/2019/Ubuntu-18-04-Customization</loc>
 <lastmod>2019-05-11T00:00:00-04:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/posts/2019/Fedora-30-Customization</loc>
+<lastmod>2019-05-12T00:00:00-04:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch</loc>
@@ -33,8 +37,5 @@
 </url>
 <url>
 <loc>http://localhost:4000/</loc>
-</url>
-<url>
-<loc>http://localhost:4000/page2/</loc>
 </url>
 </urlset>

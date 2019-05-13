@@ -1,5 +1,5 @@
 ---
-title: "Ubuntu Customization"
+title: "Ubuntu 18.04 Customization"
 excerpt: "A script I use to customize my Ubuntu 18.04 environment"
 ---
 
