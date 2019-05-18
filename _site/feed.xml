@@ -1,4 +1,264 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-12T21:52:19-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Private VLAN’s on a Cisco switch</title><link href="http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch" rel="alternate" type="text/html" title="Private VLAN's on a Cisco switch" /><published>2019-05-12T00:00:00-04:00</published><updated>2019-05-12T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch</id><content type="html" xml:base="http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch">&lt;p&gt;All hosts in an a broadcast domain can communicate with each other. For example, Figure 1 below shows 5 PC’s connected to a single switch, each configured with an IP address on the same subnet. If PC-1 was to ping PC-5, it will send an ARP request first, flooding the network and reaching all hosts. PC-5 will respond with an ARP reply and ICMP traffic will then be able to flow between hosts.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-18T16:35:19-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Windows 10 deployment with Linux</title><link href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux" rel="alternate" type="text/html" title="Windows 10 deployment with Linux" /><published>2019-05-13T00:00:00-04:00</published><updated>2019-05-13T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Windows-deployment-with-Linux</id><content type="html" xml:base="http://localhost:4000/posts/2019/Windows-deployment-with-Linux">&lt;p&gt;I’ve always been under the impression that you need Windows Deployment Services (WDS) in order to deploy Windows with the Microsoft Deployment Toolkit (MDT). But it turns out you need nothing more than a Samba share, TFTP server, and a few tweaks to DHCP to get a pretty solid set up.&lt;/p&gt;
+
+&lt;p&gt;This procedure involves generating a boot image with MDT and copying that image to a TFTP server. A client then PXE boots, loads that image into memory through memdisk and runs the task sequence to install Windows. You will of course require one Windows machine to configure the task sequences.&lt;/p&gt;
+
+&lt;p&gt;This guide only contains the barebones installation of Windows through a Deployment Share. You can add software and automate the process to provide a zero touch installation. More on that in a future post.&lt;/p&gt;
+
+&lt;h1 id=&quot;requirements&quot;&gt;Requirements&lt;/h1&gt;
+&lt;p&gt;Below are the requirements:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;#Linux computer with a Samba share&quot;&gt;Linux computer with a Samba share&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#Windows 10 computer with MDT&quot;&gt;Windows 10 computer with MDT&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#TFTP Server&quot;&gt;TFTP server&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#DHCP Server&quot;&gt;DHCP server&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;To keep things simple, I will configure Samba, DHCP, and TFTP on the same computer. I will be using CentOS in this guide but these steps should be easily portable to other flavours of Linux.&lt;/p&gt;
+
+&lt;p&gt;This guide is based on a virtual environment using KVM. The CentOS computer will be configured with an IP address of 192.168.122.100/24. All other computers (Windows 10, deployment machine) are virtual and configured to use DHCP.&lt;/p&gt;
+
+&lt;p&gt;The CentOS computer has been installed with the CentOS minimal ISO. The latest updates have been installed.&lt;/p&gt;
+
+&lt;h1 id=&quot;steps&quot;&gt;Steps&lt;/h1&gt;
+&lt;h2 id=&quot;linux-computer-with-a-samba-share&quot;&gt;&lt;a name=&quot;Linux computer with a Samba share&quot;&gt;Linux computer with a Samba share&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Install samba and policycoreutils-python. The latter package will give us the semanage command for SELinux.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum install &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt; samba policycoreutils-python&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Create two user accounts; mdtread and mdtwrite. The mdtread account will used to connect to the deployment share during deployment. The mdtwrite account is what the Windows 10 computer will use to connect and make changes to the deployment share. These accounts are only needed for authentication so we won’t create a home directory (-M) or give them a shell (-s /sbin/nologin).&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# useradd &lt;span class=&quot;nt&quot;&gt;-M&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /sbin/nologin mdtread
+~]# useradd &lt;span class=&quot;nt&quot;&gt;-M&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /sbin/nologin mdtwrite
+~]# passwd mdtread
+~]# passwd mdtread
+~]# smbpasswd &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; mdtread
+~]# smbpasswd &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; mdtwrite&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Create and configure the MDT Share for Samba. I create this as a hidden share so it does not appear in an explorer window. I remove everything in the default smb.conf except the [global] section.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# mkdir &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; /data/mdt
+~]# chown &lt;span class=&quot;nt&quot;&gt;-R&lt;/span&gt; mdtwrite:mdtwrite /data/mdt
+~]# vi /etc/samba/smb.conf
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;mdt&lt;span class=&quot;nv&quot;&gt;$]&lt;/span&gt;
+    path &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /data/mdt
+    valid users &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; mdtread mdtwrite
+    write list &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; mdtwrite&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Verify everything is ok with the Samba configuration file&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# testparm&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Configure SELinux to allow Samba access to the mdt directory. Verify this with the ls commmand.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# semanage fcontext &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; samba_share_t &lt;span class=&quot;s2&quot;&gt;&quot;/data/mdt(/.*)?&quot;&lt;/span&gt;
+~]# restorecon /data/mdt
+~]# &lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-alZ&lt;/span&gt; /data/mdt&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# systemctl start smb
+~]# systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;smb
+~]# firewall-cmd &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;samba
+~]# firewall-cmd &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;samba &lt;span class=&quot;nt&quot;&gt;--permanent&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;optional&quot;&gt;Optional&lt;/h4&gt;
+&lt;p&gt;If you must enable NetBIOS, start and enable nmbd. This will allow you to resolve to the hostname of your Linux computer through NetBIOS, rather than DNS.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# systemctl start nmb
+~]# systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;nmb&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h4 id=&quot;verify-share-access&quot;&gt;Verify Share Access&lt;/h4&gt;
+&lt;p&gt;On your Windows 10 computer, verify you can access the share. Click on the Start menu and type \\192.168.122.100\mdt$&lt;/p&gt;
+
+&lt;h2 id=&quot;windows-10-computer-with-mdt&quot;&gt;&lt;a name=&quot;Windows 10 computer with MDT&quot;&gt;Windows 10 computer with MDT&lt;/a&gt;&lt;/h2&gt;
+&lt;h3 id=&quot;install-mdt-and-adk&quot;&gt;Install MDT and ADK&lt;/h3&gt;
+&lt;p&gt;You will need to download and install the following:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Microsoft Deployment Toolkit&lt;/li&gt;
+  &lt;li&gt;Windows 10 Assessment and Deployment Kit (I just install Deployment Tools and Windows PE)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;A simple Google search will bring up the download links for this software.&lt;/p&gt;
+
+&lt;h3 id=&quot;add-deployment-share-to-mdt&quot;&gt;Add Deployment Share to MDT&lt;/h3&gt;
+
+&lt;p&gt;Once MDT and ADK are installed, open the Deployment Workbench.&lt;/p&gt;
+
+&lt;p&gt;Right click Deployment Shares and select New Deployment Share.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/new-deployment-share.png&quot; alt=&quot;New Deployment Share&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If you try to add the deployment share through its UNC path, you will receieve an error. This is because you haven’t been authenticated yet. What you can do to work around this is open the Credential Manager from the Control Panel and add new Windows credentials for your share (192.168.122.100, mdtwrite, &amp;lt;password&amp;gt;).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/add-unc-path.png&quot; alt=&quot;Add using UNC path&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/credential-manager.png&quot; alt=&quot;Credential Manager&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Follow the rest of the prompts. These can always be changed at a later stage. The Deployment Workbench will now copy some files to the MDT share.&lt;/p&gt;
+
+&lt;h3 id=&quot;obtain-windows-10-iso-and-upload-to-deployment-share&quot;&gt;Obtain Windows 10 ISO and Upload to Deployment Share&lt;/h3&gt;
+&lt;p&gt;You will need a Windows 10 ISO to upload to the MDT share. Thankfully this can be downloaded quite easily from the Microsoft website, unlike previous versions of Windows.&lt;/p&gt;
+
+&lt;p&gt;If using a Mac or Linux computer, you can go &lt;a href=&quot;https://www.microsoft.com/en-us/software-download/windows10ISO&quot;&gt;here&lt;/a&gt; and select the edition and language to download.&lt;/p&gt;
+
+&lt;p&gt;Downloading from a Windows machine requires a few more steps. It’s nothing hard but we just need to trick the web server into thinking that we are using another operating system, otherwise we are presented wtith the Windows 10 installation media download. In Google Chrome, go to the &lt;a href=&quot;https://www.microsoft.com/en-us/software-download/windows10ISO&quot;&gt;Windows 10 download site&lt;/a&gt;. Open the Developer tools (CTRL + SHIFT + I). Click the three dots at the top right hand corner &amp;gt; More Tools &amp;gt; Network Conditions. Uncheck Select Automatically and select a non-Windows OS, such as Chrome - Mac. Hit the refresh button and you will be able to select the edition and language to download.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/network-conditions.png&quot; alt=&quot;Network Conditions&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/chrome-mac.png&quot; alt=&quot;Chrome Mac&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I download the English version. I haven’t verified this but I believe the difference between English and English International is the English version is US English. The English International version is British English and contains additional keyboard layouts.&lt;/p&gt;
+
+&lt;p&gt;Once the download has completed, mount the ISO.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/mount-os.png&quot; alt=&quot;Mount OS&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Back in the Deployment Share, right click Operating Systems and select Import Operating System.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/import-os.png&quot; alt=&quot;Import OS&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Make sure Full set of source files is checked and click next.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/os-type.png&quot; alt=&quot;OS Type&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Browse to the drive where the ISO was mounted and click next.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/os-source.png&quot; alt=&quot;OS Source&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Follow the rest of the prompts. The OS files will begin uploadeding to the Deployment Share. This may take a few minutes.&lt;/p&gt;
+
+&lt;p&gt;Now we want to create a task sequence. Right click Task Sequences and select New Task Sequence.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/new-task-sequence.png&quot; alt=&quot;New Task Sequence&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Give the Task Sequence an ID and Name and click next.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/task-sequence-name.png&quot; alt=&quot;Task Sequence Name&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Make sure Standard Client Task Sequence is selected and click next.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/task-sequence-template.png&quot; alt=&quot;Task Sequence Template&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Select the OS that you are deploying. Here I’m using Windows 10 Pro.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/task-sequence-select-os.png&quot; alt=&quot;Task Sequence Select OS&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Follow the rest of the prompts. I only have individual activation keys, so I don’t specify them during the install.&lt;/p&gt;
+
+&lt;p&gt;We are now ready to generate the ISO that we can boot for deployment. Right click on the Deployment Share and select Update Deployment Share. Since this is a new Deployment Share, just click next through the prompts. The ISO that needs to be uploaded to the TFTP Server will be generated. This may take a few minutes.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/update-deployment-share.png&quot; alt=&quot;Update Deployment Share&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;tftp-server&quot;&gt;&lt;a name=&quot;TFTP Server&quot;&gt;TFTP server&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Install TFTP Server.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum install &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt; tftp-server&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Enable TFTP Server in its configuration file by changing the disable line from yes to no.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# vi /etc/xinetd.d/tftp
+disable &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; no&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Download syslinux. We need to use memdisk to boot the ISO. I just pull syslinux from the CentOS repos.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum install &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt; syslinux&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Copy the necessary syslinux files to the tftpboot directory.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# cp /usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/
+~]# cp /usr/share/syslinux/memdisk /var/lib/tftpboot/
+~]# cp /usr/share/syslinux/menu.c32 /var/lib/tftpboot/&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Copy the LiteTouch ISO to the tftpboot directory.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# cp /data/mdt/Boot/LiteTouchPE_x64.iso /var/lib/tftpboot/&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Create the boot menu.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# mkdir &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; /var/lib/tftpboot/pxelinux.cfg
+~]# vi /var/lib/tftpboot/pxelinux.cfg/default
+default menu.c32
+prompt 0
+timeout 300
+ONTIMEOUT 1
+
+menu title &lt;span class=&quot;c&quot;&gt;########## OS Deploy ##########&lt;/span&gt;
+
+label 1
+menu label ^1&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Boot from &lt;span class=&quot;nb&quot;&gt;local &lt;/span&gt;drive
+localboot 0
+
+label 2
+menu label ^2&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Windows 10
+&lt;span class=&quot;c&quot;&gt;#menu default&lt;/span&gt;
+kernel memdisk
+append iso &lt;span class=&quot;nv&quot;&gt;initrd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;LiteTouchPE_x64.iso raw&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Start the TFTP server and enable on startup.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# systemctl start tftp
+~]# systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;tftp&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Configure firewall to allow TFTP through.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# firewall-cmd &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;tftp
+~]# firewall-cmd &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;tftp &lt;span class=&quot;nt&quot;&gt;--permanent&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;dhcp-server&quot;&gt;&lt;a name=&quot;DHCP Server&quot;&gt;DHCP Server&lt;/a&gt;&lt;/h2&gt;
+&lt;p&gt;Install the DHCP server&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum install &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt; dhcp&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Configure the DHCP server&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# vi /etc/dhcp/dhcpd.conf
+&lt;span class=&quot;nv&quot;&gt;DHCPDARGS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;eth0&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;#Listen on eth0&lt;/span&gt;
+subnet 192.168.122.0 netmask 255.255.255.0
+&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        option routers                  192.168.122.1&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        option subnet-mask              255.255.255.0&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        option domain-search            &lt;span class=&quot;s2&quot;&gt;&quot;lab.local&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        option domain-name-servers      192.168.122.1&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        option time-offset              &lt;span class=&quot;nt&quot;&gt;-18000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;     &lt;span class=&quot;c&quot;&gt;# Eastern Standard Time&lt;/span&gt;
+        filename                        &lt;span class=&quot;s2&quot;&gt;&quot;pxelinux.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        next-server                     192.168.122.100&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        range                           192.168.122.10 192.168.122.99&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Start the DHCP service and enable on startup&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# systemctl start dhcpd
+~]# systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;dhcpd&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Configure firewall to allow DHCP requests&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# firewall-cmd &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;dhcp
+~]# firewall-cmd &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;dhcp &lt;span class=&quot;nt&quot;&gt;--permanent&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;finishing-touches&quot;&gt;Finishing Touches&lt;/h2&gt;
+
+&lt;p&gt;When the Deployment Share was created, a few files and folders were created on it. We need to adjust some of the permissions so our mdtread user can access the share.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# chmod &lt;span class=&quot;nt&quot;&gt;-R&lt;/span&gt; 755 /data/mdt&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;deployment&quot;&gt;Deployment&lt;/h2&gt;
+
+&lt;p&gt;We are now ready to deploy Windows 10.&lt;/p&gt;
+
+&lt;p&gt;Network boot the computer and select Windows 10.
+&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/pxe-win-10.png&quot; alt=&quot;PXE Windows 10&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Select Run Deployment Wizard to install a new Operating System.
+&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/run-deployment-wizard.png&quot; alt=&quot;Run Deployment Wizard&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Enter the read only credentials of the Deployment Share.
+&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/deployment-credentials.png&quot; alt=&quot;Deployment Credentials&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Select the Windows 10 Deployment Task Sequence and follow the rest of the prompts. Follow the rest of the prompts. Windows 10 will now be installed.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://wiki.samba.org/index.php/Setting_up_Samba_as_a_Standalone_Server#Creating_a_Local_User_Account&quot;&gt;Samba - Creating Local Accounts&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html&quot;&gt;Samba Configuration File&lt;/a&gt;&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux</summary></entry><entry><title type="html">Private VLAN’s on a Cisco switch</title><link href="http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch" rel="alternate" type="text/html" title="Private VLAN's on a Cisco switch" /><published>2019-05-12T00:00:00-04:00</published><updated>2019-05-12T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch</id><content type="html" xml:base="http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch">&lt;p&gt;All hosts in an a broadcast domain can communicate with each other. For example, Figure 1 below shows 5 PC’s connected to a single switch, each configured with an IP address on the same subnet. If PC-1 was to ping PC-5, it will send an ARP request first, flooding the network and reaching all hosts. PC-5 will respond with an ARP reply and ICMP traffic will then be able to flow between hosts.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/private-vlans.png&quot; alt=&quot;Private VLAN Topology&quot; /&gt;
 &lt;em&gt;Figure 1: Private VLAN topology&lt;/em&gt;&lt;/p&gt;

@@ -38,4 +38,9 @@ var store = [{
         "excerpt":"All hosts in an a broadcast domain can communicate with each other. For example, Figure 1 below shows 5 PC’s connected to a single switch, each configured with an IP address on the same subnet. If PC-1 was to ping PC-5, it will send an ARP request first, flooding the...","categories": [],
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch",
+        "teaser":null},{
+        "title": "Windows 10 deployment with Linux",
+        "excerpt":"I’ve always been under the impression that you need Windows Deployment Services (WDS) in order to deploy Windows with the Microsoft Deployment Toolkit (MDT). But it turns out you need nothing more than a Samba share, TFTP server, and a few tweaks to DHCP to get a pretty solid set...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Windows-deployment-with-Linux",
         "teaser":null}]

@@ -1,0 +1,739 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.16.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Windows 10 deployment with Linux - Rico Sharp</title>
+<meta name="description" content="A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Rico Sharp">
+<meta property="og:title" content="Windows 10 deployment with Linux">
+<meta property="og:url" content="http://localhost:4000/posts/2019/Windows-deployment-with-Linux">
+
+
+  <meta property="og:description" content="A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2019-05-13T00:00:00-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux">
+
+
+
+
+
+
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "",
+      "url": "http://localhost:4000",
+      "sameAs": null
+    }
+  </script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Rico Sharp Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE ]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">Rico Sharp</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about" >About</a>
+            </li><li class="masthead__menu-item">
+              <a href="http://resume.ricosharp.com" >Resume</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Rico Sharp" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Rico Sharp</h3>
+    
+    
+      <p class="author__bio" itemprop="description">
+        
+      </p>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Washington, D.C.</span>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:rico.sharp@gmail.com">
+            <meta itemprop="email" content="rico.sharp@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/ricosharp" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Windows 10 deployment with Linux">
+    <meta itemprop="description" content="A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux">
+    <meta itemprop="datePublished" content="May 13, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Windows 10 deployment with Linux
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  7 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>I’ve always been under the impression that you need Windows Deployment Services (WDS) in order to deploy Windows with the Microsoft Deployment Toolkit (MDT). But it turns out you need nothing more than a Samba share, TFTP server, and a few tweaks to DHCP to get a pretty solid set up.</p>
+
+<p>This procedure involves generating a boot image with MDT and copying that image to a TFTP server. A client then PXE boots, loads that image into memory through memdisk and runs the task sequence to install Windows. You will of course require one Windows machine to configure the task sequences.</p>
+
+<p>This guide only contains the barebones installation of Windows through a Deployment Share. You can add software and automate the process to provide a zero touch installation. More on that in a future post.</p>
+
+<h1 id="requirements">Requirements</h1>
+<p>Below are the requirements:</p>
+<ul>
+  <li><a href="#Linux computer with a Samba share">Linux computer with a Samba share</a></li>
+  <li><a href="#Windows 10 computer with MDT">Windows 10 computer with MDT</a></li>
+  <li><a href="#TFTP Server">TFTP server</a></li>
+  <li><a href="#DHCP Server">DHCP server</a></li>
+</ul>
+
+<p>To keep things simple, I will configure Samba, DHCP, and TFTP on the same computer. I will be using CentOS in this guide but these steps should be easily portable to other flavours of Linux.</p>
+
+<p>This guide is based on a virtual environment using KVM. The CentOS computer will be configured with an IP address of 192.168.122.100/24. All other computers (Windows 10, deployment machine) are virtual and configured to use DHCP.</p>
+
+<p>The CentOS computer has been installed with the CentOS minimal ISO. The latest updates have been installed.</p>
+
+<h1 id="steps">Steps</h1>
+<h2 id="linux-computer-with-a-samba-share"><a name="Linux computer with a Samba share">Linux computer with a Samba share</a></h2>
+<p>Install samba and policycoreutils-python. The latter package will give us the semanage command for SELinux.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> samba policycoreutils-python</code></pre></figure>
+
+<p>Create two user accounts; mdtread and mdtwrite. The mdtread account will used to connect to the deployment share during deployment. The mdtwrite account is what the Windows 10 computer will use to connect and make changes to the deployment share. These accounts are only needed for authentication so we won’t create a home directory (-M) or give them a shell (-s /sbin/nologin).</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# useradd <span class="nt">-M</span> <span class="nt">-s</span> /sbin/nologin mdtread
+~]# useradd <span class="nt">-M</span> <span class="nt">-s</span> /sbin/nologin mdtwrite
+~]# passwd mdtread
+~]# passwd mdtread
+~]# smbpasswd <span class="nt">-a</span> mdtread
+~]# smbpasswd <span class="nt">-a</span> mdtwrite</code></pre></figure>
+
+<p>Create and configure the MDT Share for Samba. I create this as a hidden share so it does not appear in an explorer window. I remove everything in the default smb.conf except the [global] section.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# mkdir <span class="nt">-p</span> /data/mdt
+~]# chown <span class="nt">-R</span> mdtwrite:mdtwrite /data/mdt
+~]# vi /etc/samba/smb.conf
+<span class="o">[</span>mdt<span class="nv">$]</span>
+    path <span class="o">=</span> /data/mdt
+    valid users <span class="o">=</span> mdtread mdtwrite
+    write list <span class="o">=</span> mdtwrite</code></pre></figure>
+
+<p>Verify everything is ok with the Samba configuration file</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# testparm</code></pre></figure>
+
+<p>Configure SELinux to allow Samba access to the mdt directory. Verify this with the ls commmand.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# semanage fcontext <span class="nt">-a</span> <span class="nt">-t</span> samba_share_t <span class="s2">"/data/mdt(/.*)?"</span>
+~]# restorecon /data/mdt
+~]# <span class="nb">ls</span> <span class="nt">-alZ</span> /data/mdt</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# systemctl start smb
+~]# systemctl <span class="nb">enable </span>smb
+~]# firewall-cmd <span class="nt">--add-service</span><span class="o">=</span>samba
+~]# firewall-cmd <span class="nt">--add-service</span><span class="o">=</span>samba <span class="nt">--permanent</span></code></pre></figure>
+
+<h4 id="optional">Optional</h4>
+<p>If you must enable NetBIOS, start and enable nmbd. This will allow you to resolve to the hostname of your Linux computer through NetBIOS, rather than DNS.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# systemctl start nmb
+~]# systemctl <span class="nb">enable </span>nmb</code></pre></figure>
+
+<h4 id="verify-share-access">Verify Share Access</h4>
+<p>On your Windows 10 computer, verify you can access the share. Click on the Start menu and type \\192.168.122.100\mdt$</p>
+
+<h2 id="windows-10-computer-with-mdt"><a name="Windows 10 computer with MDT">Windows 10 computer with MDT</a></h2>
+<h3 id="install-mdt-and-adk">Install MDT and ADK</h3>
+<p>You will need to download and install the following:</p>
+<ul>
+  <li>Microsoft Deployment Toolkit</li>
+  <li>Windows 10 Assessment and Deployment Kit (I just install Deployment Tools and Windows PE)</li>
+</ul>
+
+<p>A simple Google search will bring up the download links for this software.</p>
+
+<h3 id="add-deployment-share-to-mdt">Add Deployment Share to MDT</h3>
+
+<p>Once MDT and ADK are installed, open the Deployment Workbench.</p>
+
+<p>Right click Deployment Shares and select New Deployment Share.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/new-deployment-share.png" alt="New Deployment Share" /></p>
+
+<p>If you try to add the deployment share through its UNC path, you will receieve an error. This is because you haven’t been authenticated yet. What you can do to work around this is open the Credential Manager from the Control Panel and add new Windows credentials for your share (192.168.122.100, mdtwrite, &lt;password&gt;).</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/add-unc-path.png" alt="Add using UNC path" /></p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/credential-manager.png" alt="Credential Manager" /></p>
+
+<p>Follow the rest of the prompts. These can always be changed at a later stage. The Deployment Workbench will now copy some files to the MDT share.</p>
+
+<h3 id="obtain-windows-10-iso-and-upload-to-deployment-share">Obtain Windows 10 ISO and Upload to Deployment Share</h3>
+<p>You will need a Windows 10 ISO to upload to the MDT share. Thankfully this can be downloaded quite easily from the Microsoft website, unlike previous versions of Windows.</p>
+
+<p>If using a Mac or Linux computer, you can go <a href="https://www.microsoft.com/en-us/software-download/windows10ISO">here</a> and select the edition and language to download.</p>
+
+<p>Downloading from a Windows machine requires a few more steps. It’s nothing hard but we just need to trick the web server into thinking that we are using another operating system, otherwise we are presented wtith the Windows 10 installation media download. In Google Chrome, go to the <a href="https://www.microsoft.com/en-us/software-download/windows10ISO">Windows 10 download site</a>. Open the Developer tools (CTRL + SHIFT + I). Click the three dots at the top right hand corner &gt; More Tools &gt; Network Conditions. Uncheck Select Automatically and select a non-Windows OS, such as Chrome - Mac. Hit the refresh button and you will be able to select the edition and language to download.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/network-conditions.png" alt="Network Conditions" /></p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/chrome-mac.png" alt="Chrome Mac" /></p>
+
+<p>I download the English version. I haven’t verified this but I believe the difference between English and English International is the English version is US English. The English International version is British English and contains additional keyboard layouts.</p>
+
+<p>Once the download has completed, mount the ISO.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/mount-os.png" alt="Mount OS" /></p>
+
+<p>Back in the Deployment Share, right click Operating Systems and select Import Operating System.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/import-os.png" alt="Import OS" /></p>
+
+<p>Make sure Full set of source files is checked and click next.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/os-type.png" alt="OS Type" /></p>
+
+<p>Browse to the drive where the ISO was mounted and click next.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/os-source.png" alt="OS Source" /></p>
+
+<p>Follow the rest of the prompts. The OS files will begin uploadeding to the Deployment Share. This may take a few minutes.</p>
+
+<p>Now we want to create a task sequence. Right click Task Sequences and select New Task Sequence.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/new-task-sequence.png" alt="New Task Sequence" /></p>
+
+<p>Give the Task Sequence an ID and Name and click next.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/task-sequence-name.png" alt="Task Sequence Name" /></p>
+
+<p>Make sure Standard Client Task Sequence is selected and click next.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/task-sequence-template.png" alt="Task Sequence Template" /></p>
+
+<p>Select the OS that you are deploying. Here I’m using Windows 10 Pro.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/task-sequence-select-os.png" alt="Task Sequence Select OS" /></p>
+
+<p>Follow the rest of the prompts. I only have individual activation keys, so I don’t specify them during the install.</p>
+
+<p>We are now ready to generate the ISO that we can boot for deployment. Right click on the Deployment Share and select Update Deployment Share. Since this is a new Deployment Share, just click next through the prompts. The ISO that needs to be uploaded to the TFTP Server will be generated. This may take a few minutes.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/update-deployment-share.png" alt="Update Deployment Share" /></p>
+
+<h2 id="tftp-server"><a name="TFTP Server">TFTP server</a></h2>
+
+<p>Install TFTP Server.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> tftp-server</code></pre></figure>
+
+<p>Enable TFTP Server in its configuration file by changing the disable line from yes to no.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# vi /etc/xinetd.d/tftp
+disable <span class="o">=</span> no</code></pre></figure>
+
+<p>Download syslinux. We need to use memdisk to boot the ISO. I just pull syslinux from the CentOS repos.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> syslinux</code></pre></figure>
+
+<p>Copy the necessary syslinux files to the tftpboot directory.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# cp /usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/
+~]# cp /usr/share/syslinux/memdisk /var/lib/tftpboot/
+~]# cp /usr/share/syslinux/menu.c32 /var/lib/tftpboot/</code></pre></figure>
+
+<p>Copy the LiteTouch ISO to the tftpboot directory.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# cp /data/mdt/Boot/LiteTouchPE_x64.iso /var/lib/tftpboot/</code></pre></figure>
+
+<p>Create the boot menu.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# mkdir <span class="nt">-p</span> /var/lib/tftpboot/pxelinux.cfg
+~]# vi /var/lib/tftpboot/pxelinux.cfg/default
+default menu.c32
+prompt 0
+timeout 300
+ONTIMEOUT 1
+
+menu title <span class="c">########## OS Deploy ##########</span>
+
+label 1
+menu label ^1<span class="o">)</span> Boot from <span class="nb">local </span>drive
+localboot 0
+
+label 2
+menu label ^2<span class="o">)</span> Windows 10
+<span class="c">#menu default</span>
+kernel memdisk
+append iso <span class="nv">initrd</span><span class="o">=</span>LiteTouchPE_x64.iso raw</code></pre></figure>
+
+<p>Start the TFTP server and enable on startup.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# systemctl start tftp
+~]# systemctl <span class="nb">enable </span>tftp</code></pre></figure>
+
+<p>Configure firewall to allow TFTP through.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# firewall-cmd <span class="nt">--add-service</span><span class="o">=</span>tftp
+~]# firewall-cmd <span class="nt">--add-service</span><span class="o">=</span>tftp <span class="nt">--permanent</span></code></pre></figure>
+
+<h2 id="dhcp-server"><a name="DHCP Server">DHCP Server</a></h2>
+<p>Install the DHCP server</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> dhcp</code></pre></figure>
+
+<p>Configure the DHCP server</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# vi /etc/dhcp/dhcpd.conf
+<span class="nv">DHCPDARGS</span><span class="o">=</span>eth0<span class="p">;</span> <span class="c">#Listen on eth0</span>
+subnet 192.168.122.0 netmask 255.255.255.0
+<span class="o">{</span>
+        option routers                  192.168.122.1<span class="p">;</span>
+        option subnet-mask              255.255.255.0<span class="p">;</span>
+        option domain-search            <span class="s2">"lab.local"</span><span class="p">;</span>
+        option domain-name-servers      192.168.122.1<span class="p">;</span>
+        option time-offset              <span class="nt">-18000</span><span class="p">;</span>     <span class="c"># Eastern Standard Time</span>
+        filename                        <span class="s2">"pxelinux.0"</span><span class="p">;</span>
+        next-server                     192.168.122.100<span class="p">;</span>
+        range                           192.168.122.10 192.168.122.99<span class="p">;</span>
+<span class="o">}</span></code></pre></figure>
+
+<p>Start the DHCP service and enable on startup</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# systemctl start dhcpd
+~]# systemctl <span class="nb">enable </span>dhcpd</code></pre></figure>
+
+<p>Configure firewall to allow DHCP requests</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# firewall-cmd <span class="nt">--add-service</span><span class="o">=</span>dhcp
+~]# firewall-cmd <span class="nt">--add-service</span><span class="o">=</span>dhcp <span class="nt">--permanent</span></code></pre></figure>
+
+<h2 id="finishing-touches">Finishing Touches</h2>
+
+<p>When the Deployment Share was created, a few files and folders were created on it. We need to adjust some of the permissions so our mdtread user can access the share.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# chmod <span class="nt">-R</span> 755 /data/mdt</code></pre></figure>
+
+<h2 id="deployment">Deployment</h2>
+
+<p>We are now ready to deploy Windows 10.</p>
+
+<p>Network boot the computer and select Windows 10.
+<img src="http://localhost:4000/assets/images/posts/2019/pxe-win-10.png" alt="PXE Windows 10" /></p>
+
+<p>Select Run Deployment Wizard to install a new Operating System.
+<img src="http://localhost:4000/assets/images/posts/2019/run-deployment-wizard.png" alt="Run Deployment Wizard" /></p>
+
+<p>Enter the read only credentials of the Deployment Share.
+<img src="http://localhost:4000/assets/images/posts/2019/deployment-credentials.png" alt="Deployment Credentials" /></p>
+
+<p>Select the Windows 10 Deployment Task Sequence and follow the rest of the prompts. Follow the rest of the prompts. Windows 10 will now be installed.</p>
+
+<h2 id="references">References</h2>
+<p><a href="https://wiki.samba.org/index.php/Setting_up_Samba_as_a_Standalone_Server#Creating_a_Local_User_Account">Samba - Creating Local Accounts</a></p>
+
+<p><a href="https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html">Samba Configuration File</a></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-13T00:00:00-04:00">May 13, 2019</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/posts/2019/Private-VLANs-on-a-Cisco-switch" class="pagination--pager" title="Private VLAN’s on a Cisco switch
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Private-VLANs-on-a-Cisco-switch" rel="permalink">Private VLAN’s on a Cisco switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to configure Private VLAN’s on a Cisco switch
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Fedora-30-Customization" rel="permalink">Fedora 30 Customization
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  less than 1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A script I use to customize my Fedora 30 environment
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Ubuntu-18-04-Customization" rel="permalink">Ubuntu 18.04 Customization
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  less than 1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A script I use to customize my Ubuntu 18.04 environment
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Re-streaming-video-to-a-multicast-address-with-VLC" rel="permalink">Re-streaming video to a multicast address with VLC
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to stream just about anything to a multicast address using VLC
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2019 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js" integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
