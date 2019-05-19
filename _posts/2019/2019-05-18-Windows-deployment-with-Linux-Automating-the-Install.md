@@ -7,11 +7,11 @@ My [previous post](https://blog.ricosharp.com/posts/2019/Windows-deployment-with
 
 In order to achieve a fully automated installation, you need to set some parameters in the CustomSettings.ini and Bootstrap.ini files. What these parameters do should be self evident in the configuration below.
 
-My personal preference is not to fully automate a deployment. This gives you a way out if you accidentally network boot into the Windows PE environment, which would then automatically begin the Task Sequence. What I prefer to do is not skip one of the parts of the wizard, such as the Task Sequence (SkipTaskSequence=NO) selection which will force you to choose a Task Sequence.
+My personal preference is not to fully automate a deployment. This gives you a way out if you accidentally network boot into the Windows PE environment, which would then automatically begin the Task Sequence. What I prefer to do force a page from the wizard to show, such as the Task Sequence selection (SkipTaskSequence=NO).
 
 ## CustomSettings.ini
 
-There are two ways to edit this file
+There are two ways to edit this file:
 
 1. Open \\\%DeployRoot%\Control\CustomSettings.ini with a text editor such as notepad.
 2. In the Deployment Workbench, right click your Deployment Share then select properties. The CustomSettings.ini file can be edited from the Rules tab.
@@ -40,7 +40,7 @@ SkipSummary=YES
 {% endhighlight %}
 ## Booststrap.ini
 
-There are two ways to edit this file
+There are two ways to edit this file:
 
 1. Open \\\%DeployRoot%\Control\Bootstrap.ini with a text editor such as notepad.
 2. In the Deployment Workbench, right click your Deployment Share then select properties. Select the Rules tab then click Edit Bootstrap.ini.
