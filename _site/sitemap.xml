@@ -33,8 +33,12 @@
 <lastmod>2019-05-12T00:00:00-04:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:4000/posts/2019/Windows-deployment-with-Linux</loc>
+<loc>http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Initial-Setup</loc>
 <lastmod>2019-05-13T00:00:00-04:00</lastmod>
+</url>
+<url>
+<loc>http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install</loc>
+<lastmod>2019-05-18T00:00:00-04:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/about/</loc>

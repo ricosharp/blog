@@ -1,5 +1,5 @@
 ---
-title: "Windows 10 deployment with Linux"
+title: "Windows 10 deployment with Linux - Initial Setup"
 excerpt: "A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux"
 ---
 

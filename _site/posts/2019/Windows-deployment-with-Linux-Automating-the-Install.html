@@ -9,38 +9,38 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>My First Jekyll Post - Rico Sharp</title>
-<meta name="description" content="Hello World!">
+<!-- begin _includes/seo.html --><title>Windows 10 deployment with Linux - Automating the Install - Rico Sharp</title>
+<meta name="description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
 
 
 
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Rico Sharp">
-<meta property="og:title" content="My First Jekyll Post">
-<meta property="og:url" content="http://localhost:4000/posts/2018/My-First-Jekyll-Post">
+<meta property="og:title" content="Windows 10 deployment with Linux - Automating the Install">
+<meta property="og:url" content="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">
 
 
-  <meta property="og:description" content="Hello World!">
-
-
-
-
-
-
-
-  <meta property="article:published_time" content="2018-05-06T00:00:00-04:00">
+  <meta property="og:description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
 
 
 
 
 
-  
+
+
+  <meta property="article:published_time" content="2019-05-18T00:00:00-04:00">
+
+
+
+
 
   
 
+  
 
-<link rel="canonical" href="http://localhost:4000/posts/2018/My-First-Jekyll-Post">
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">
 
 
 
@@ -257,15 +257,15 @@
 
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="My First Jekyll Post">
-    <meta itemprop="description" content="Hello World!">
-    <meta itemprop="datePublished" content="May 06, 2018">
+    <meta itemprop="headline" content="Windows 10 deployment with Linux - Automating the Install">
+    <meta itemprop="description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
+    <meta itemprop="datePublished" content="May 18, 2019">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">My First Jekyll Post
+          <h1 id="page-title" class="page__title" itemprop="headline">Windows 10 deployment with Linux - Automating the Install
 </h1>
           
             <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
@@ -273,7 +273,7 @@
 
 
 
-  less than 1 minute read
+  1 minute read
 </p>
           
         </header>
@@ -281,7 +281,63 @@
 
       <section class="page__content" itemprop="text">
         
-        <p>Hello World!</p>
+        <p>My <a href="https://blog.ricosharp.com/posts/2019/Windows-deployment-with-Linux">previous post</a> about Windows 10 Deployment with Linux was focussed on how to get up and running. But the deployment process requires quite a bit of user interaction. For example, after network booting, you have to login to the deployment share. You then have to select the task sequence and set a bunch of other parameters. All of these steps can be automated to the point where there is zero user interaction.</p>
+
+<p>In order to achieve a fully automated installation, you need to set some parameters in the CustomSettings.ini and Bootstrap.ini files. What these parameters do should be self evident in the configuration below.</p>
+
+<p>My personal preference is not to fully automate a deployment. This gives you a way out if you accidentally network boot into the Windows PE environment, which would then automatically begin the Task Sequence. What I prefer to do is not skip one of the parts of the wizard, such as the Task Sequence (SkipTaskSequence=NO) selection which will force you to choose a Task Sequence.</p>
+
+<h2 id="customsettingsini">CustomSettings.ini</h2>
+
+<p>There are two ways to edit this file</p>
+
+<ol>
+  <li>Open \\%DeployRoot%\Control\CustomSettings.ini with a text editor such as notepad.</li>
+  <li>In the Deployment Workbench, right click your Deployment Share then select properties. The CustomSettings.ini file can be edited from the Rules tab.</li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">[Settings]
+Priority=Default
+Properties=MyCustomProperty
+
+[Default]
+OSInstall=Y
+SkipCapture=YES
+SkipAdminPassword=YES
+SkipProductKey=YES
+SkipComputerBackup=YES
+SkipBitLocker=YES
+SkipTaskSequence=YES
+TaskSequenceID="Windows 10 Deployment"
+SkipComputerName=YES
+SkipDomainMembership=YES
+SkipUserData=YES
+SkipLocaleSelection=YES
+TimeZoneName="Eastern Standard Time"
+SkipTimeZone=YES
+SkipSummary=YES</code></pre></figure>
+
+<h2 id="booststrapini">Booststrap.ini</h2>
+
+<p>There are two ways to edit this file</p>
+
+<ol>
+  <li>Open \\%DeployRoot%\Control\Bootstrap.ini with a text editor such as notepad.</li>
+  <li>In the Deployment Workbench, right click your Deployment Share then select properties. Select the Rules tab then click Edit Bootstrap.ini.</li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">[Settings]
+Priority=Default
+
+[Default]
+DeployRoot=\\192.168.122.100\mdt$
+UserID=mdtread
+UserPassword=password
+UserDomain=192.168.122.100
+SkipBDDWelcome=YES</code></pre></figure>
+
+<h2 id="references">References</h2>
+<p><a href="https://docs.microsoft.com/en-us/sccm/mdt/toolkit-reference">Toolkit Reference for the Microsoft Deployment Toolkit</a></p>
 
         
       </section>
@@ -292,7 +348,7 @@
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-05-06T00:00:00-04:00">May 06, 2018</time></p>
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-18T00:00:00-04:00">May 18, 2019</time></p>
         
       </footer>
 
@@ -301,11 +357,11 @@
       
   <nav class="pagination">
     
-      <a href="#" class="pagination--pager disabled">Previous</a>
+      <a href="/posts/2019/Windows-deployment-with-Linux-Initial-Setup" class="pagination--pager" title="Windows 10 deployment with Linux - Initial Setup
+">Previous</a>
     
     
-      <a href="/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi" class="pagination--pager" title="ScreenCloud Player on a Raspberry Pi
-">Next</a>
+      <a href="#" class="pagination--pager disabled">Next</a>
     
   </nav>
 
@@ -320,36 +376,6 @@
       <h4 class="page__related-title">You May Also Enjoy</h4>
       <div class="grid__wrapper">
         
-          
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/posts/2019/Windows-deployment-with-Linux-Automating-the-Install" rel="permalink">Windows 10 deployment with Linux - Automating the Install
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  1 minute read
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process
-</p>
-  </article>
-</div>
-
-        
-          
           
 
 
@@ -369,7 +395,7 @@
 
 
 
-  8 minute read
+  7 minute read
 </p>
     
     <p class="archive__item-excerpt" itemprop="description">A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux
@@ -378,7 +404,6 @@
 </div>
 
         
-          
           
 
 
@@ -408,7 +433,6 @@
 
         
           
-          
 
 
 
@@ -436,8 +460,37 @@
 </div>
 
         
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Ubuntu-18-04-Customization" rel="permalink">Ubuntu 18.04 Customization
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  less than 1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A script I use to customize my Ubuntu 18.04 environment
+</p>
+  </article>
+</div>
+
+        
       </div>
     </div>
+  
   
 </div>
 

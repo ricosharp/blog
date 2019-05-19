@@ -1,4 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-18T16:35:19-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Windows 10 deployment with Linux</title><link href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux" rel="alternate" type="text/html" title="Windows 10 deployment with Linux" /><published>2019-05-13T00:00:00-04:00</published><updated>2019-05-13T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Windows-deployment-with-Linux</id><content type="html" xml:base="http://localhost:4000/posts/2019/Windows-deployment-with-Linux">&lt;p&gt;I’ve always been under the impression that you need Windows Deployment Services (WDS) in order to deploy Windows with the Microsoft Deployment Toolkit (MDT). But it turns out you need nothing more than a Samba share, TFTP server, and a few tweaks to DHCP to get a pretty solid set up.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-18T20:47:22-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Windows 10 deployment with Linux - Automating the Install</title><link href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install" rel="alternate" type="text/html" title="Windows 10 deployment with Linux - Automating the Install" /><published>2019-05-18T00:00:00-04:00</published><updated>2019-05-18T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install</id><content type="html" xml:base="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">&lt;p&gt;My &lt;a href=&quot;https://blog.ricosharp.com/posts/2019/Windows-deployment-with-Linux&quot;&gt;previous post&lt;/a&gt; about Windows 10 Deployment with Linux was focussed on how to get up and running. But the deployment process requires quite a bit of user interaction. For example, after network booting, you have to login to the deployment share. You then have to select the task sequence and set a bunch of other parameters. All of these steps can be automated to the point where there is zero user interaction.&lt;/p&gt;
+
+&lt;p&gt;In order to achieve a fully automated installation, you need to set some parameters in the CustomSettings.ini and Bootstrap.ini files. What these parameters do should be self evident in the configuration below.&lt;/p&gt;
+
+&lt;p&gt;My personal preference is not to fully automate a deployment. This gives you a way out if you accidentally network boot into the Windows PE environment, which would then automatically begin the Task Sequence. What I prefer to do is not skip one of the parts of the wizard, such as the Task Sequence (SkipTaskSequence=NO) selection which will force you to choose a Task Sequence.&lt;/p&gt;
+
+&lt;h2 id=&quot;customsettingsini&quot;&gt;CustomSettings.ini&lt;/h2&gt;
+
+&lt;p&gt;There are two ways to edit this file&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Open \\%DeployRoot%\Control\CustomSettings.ini with a text editor such as notepad.&lt;/li&gt;
+  &lt;li&gt;In the Deployment Workbench, right click your Deployment Share then select properties. The CustomSettings.ini file can be edited from the Rules tab.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[Settings]
+Priority=Default
+Properties=MyCustomProperty
+
+[Default]
+OSInstall=Y
+SkipCapture=YES
+SkipAdminPassword=YES
+SkipProductKey=YES
+SkipComputerBackup=YES
+SkipBitLocker=YES
+SkipTaskSequence=YES
+TaskSequenceID=&quot;Windows 10 Deployment&quot;
+SkipComputerName=YES
+SkipDomainMembership=YES
+SkipUserData=YES
+SkipLocaleSelection=YES
+TimeZoneName=&quot;Eastern Standard Time&quot;
+SkipTimeZone=YES
+SkipSummary=YES&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;booststrapini&quot;&gt;Booststrap.ini&lt;/h2&gt;
+
+&lt;p&gt;There are two ways to edit this file&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Open \\%DeployRoot%\Control\Bootstrap.ini with a text editor such as notepad.&lt;/li&gt;
+  &lt;li&gt;In the Deployment Workbench, right click your Deployment Share then select properties. Select the Rules tab then click Edit Bootstrap.ini.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[Settings]
+Priority=Default
+
+[Default]
+DeployRoot=\\192.168.122.100\mdt$
+UserID=mdtread
+UserPassword=password
+UserDomain=192.168.122.100
+SkipBDDWelcome=YES&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/sccm/mdt/toolkit-reference&quot;&gt;Toolkit Reference for the Microsoft Deployment Toolkit&lt;/a&gt;&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process</summary></entry><entry><title type="html">Windows 10 deployment with Linux - Initial Setup</title><link href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Initial-Setup" rel="alternate" type="text/html" title="Windows 10 deployment with Linux - Initial Setup" /><published>2019-05-13T00:00:00-04:00</published><updated>2019-05-13T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Initial-Setup</id><content type="html" xml:base="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Initial-Setup">&lt;p&gt;I’ve always been under the impression that you need Windows Deployment Services (WDS) in order to deploy Windows with the Microsoft Deployment Toolkit (MDT). But it turns out you need nothing more than a Samba share, TFTP server, and a few tweaks to DHCP to get a pretty solid set up.&lt;/p&gt;
 
 &lt;p&gt;This procedure involves generating a boot image with MDT and copying that image to a TFTP server. A client then PXE boots, loads that image into memory through memdisk and runs the task sequence to install Windows. You will of course require one Windows machine to configure the task sequences.&lt;/p&gt;
 

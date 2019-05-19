@@ -39,8 +39,13 @@ var store = [{
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Private-VLANs-on-a-Cisco-switch",
         "teaser":null},{
-        "title": "Windows 10 deployment with Linux",
+        "title": "Windows 10 deployment with Linux - Initial Setup",
         "excerpt":"I’ve always been under the impression that you need Windows Deployment Services (WDS) in order to deploy Windows with the Microsoft Deployment Toolkit (MDT). But it turns out you need nothing more than a Samba share, TFTP server, and a few tweaks to DHCP to get a pretty solid set...","categories": [],
         "tags": [],
-        "url": "http://localhost:4000/posts/2019/Windows-deployment-with-Linux",
+        "url": "http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Initial-Setup",
+        "teaser":null},{
+        "title": "Windows 10 deployment with Linux - Automating the Install",
+        "excerpt":"My previous post about Windows 10 Deployment with Linux was focussed on how to get up and running. But the deployment process requires quite a bit of user interaction. For example, after network booting, you have to login to the deployment share. You then have to select the task sequence...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install",
         "teaser":null}]
