@@ -281,6 +281,8 @@ Enter the read only credentials of the Deployment Share.
 
 Select the Windows 10 Deployment Task Sequence and follow the rest of the prompts. Follow the rest of the prompts. Windows 10 will now be installed.
 
+![Deployment Install]({{ site.url }}{{ site.baseurl }}/assets/images/posts/2019/deployment-install.png)
+
 ## References
 [Samba - Creating Local Accounts](https://wiki.samba.org/index.php/Setting_up_Samba_as_a_Standalone_Server#Creating_a_Local_User_Account)
 
