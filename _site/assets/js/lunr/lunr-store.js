@@ -48,4 +48,9 @@ var store = [{
         "excerpt":"My previous post about Windows 10 Deployment with Linux was focussed on how to get up and running. But the deployment process requires quite a bit of user interaction. For example, after network booting, you have to login to the deployment share. You then have to select the task sequence...","categories": [],
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install",
+        "teaser":null},{
+        "title": "Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server",
+        "excerpt":"This post will outline how to install an Active Directory(AD) Domain Controller on Ubuntu Server 18.04. Yes, that’s right…Active Directory on a linux host. Not a backup domain controller but a functional AD that you can create users with, join computers to, and set up group policy. Network configuration Hostname...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server",
         "teaser":null}]

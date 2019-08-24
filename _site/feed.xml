@@ -1,4 +1,243 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-05-19T01:10:52-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Windows 10 deployment with Linux - Automating the Install</title><link href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install" rel="alternate" type="text/html" title="Windows 10 deployment with Linux - Automating the Install" /><published>2019-05-18T00:00:00-04:00</published><updated>2019-05-18T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install</id><content type="html" xml:base="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">&lt;p&gt;My &lt;a href=&quot;https://blog.ricosharp.com/posts/2019/Windows-deployment-with-Linux&quot;&gt;previous post&lt;/a&gt; about Windows 10 Deployment with Linux was focussed on how to get up and running. But the deployment process requires quite a bit of user interaction. For example, after network booting, you have to login to the deployment share. You then have to select the task sequence and set a bunch of other parameters. All of these steps can be automated to the point where there is zero user interaction.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-08-24T16:06:49-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server</title><link href="http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" rel="alternate" type="text/html" title="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server" /><published>2019-08-24T00:00:00-04:00</published><updated>2019-08-24T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server</id><content type="html" xml:base="http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server">&lt;p&gt;This post will outline how to install an Active Directory(AD) Domain Controller on Ubuntu Server 18.04. Yes, that’s right…Active Directory on a linux host. Not a backup domain controller but a functional AD that you can create users with, join computers to, and set up group policy.&lt;/p&gt;
+
+&lt;h2 id=&quot;network-configuration&quot;&gt;Network configuration&lt;/h2&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Hostname&lt;/th&gt;
+      &lt;th&gt;Domain&lt;/th&gt;
+      &lt;th&gt;IP Address&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;dc1&lt;/td&gt;
+      &lt;td&gt;ad.ricosharp.com&lt;/td&gt;
+      &lt;td&gt;192.168.122.70&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&quot;configure-networking&quot;&gt;Configure networking&lt;/h2&gt;
+&lt;p&gt;Configure system hostname&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;hostnamectl set-hostname dc1&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Edit the hosts files so the hostname resolves to its IP address&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nano /etc/hosts
+&lt;span class=&quot;c&quot;&gt;# Add this line to /etc/hosts so that dc1 resolves to 192.168.122.70&lt;/span&gt;
+192.168.122.70  dc1 dc1.ad.ricosharp.com&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;em&gt;Note that Ubuntu 18.04 is now using netplan to configure IP addresses on systems. I will outline a basic configuration in a future post&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;update-system-and-install-required-packages&quot;&gt;Update system and install required packages&lt;/h2&gt;
+
+&lt;p&gt;Update and reboot the system&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt update &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt upgrade &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;reboot&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Install relevant samba, winbind, and kerberos packages. The installation will prompt for kerberos settings and will give an error at the end of installation. Ignore this for now and accept the defaults. This will be configured properly later as part of the AD installation.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt install samba smbclient winbind libpam-winbind libnss-winbind krb5-kdc libpam-krb5 &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Rename samba and kerberos files. You need to start from a clean environment when starting the samba AD setup.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;mv /etc/samba/smb.conf /etc/samba/smb.conf.orig
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;mv /etc/krb5.conf /etc/krb5.conf.orig&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;run-the-samba-ad-setup&quot;&gt;Run the samba AD setup&lt;/h2&gt;
+
+&lt;p&gt;All the default settings are fine. The only change I make is to set the DNS forwarder to 8.8.8.8. You can also use a different DNS backend. But this is out of the scope of this post for a simple setup.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;samba-tool domain provision &lt;span class=&quot;nt&quot;&gt;--use-rfc2307&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--interactive&lt;/span&gt;
+Realm &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;AD.RICOSHARP.COM]: 
+ Domain &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;AD]: 
+ Server Role &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;dc, member, standalone&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;dc]: 
+ DNS backend &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;SAMBA_INTERNAL, BIND9_FLATFILE, BIND9_DLZ, NONE&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;SAMBA_INTERNAL]: 
+ DNS forwarder IP address &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;write &lt;span class=&quot;s1&quot;&gt;'none'&lt;/span&gt; to disable forwarding&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;127.0.0.53]: 8.8.8.8
+Administrator password: 
+Retype password: 
+Looking up IPv4 addresses
+Looking up IPv6 addresses
+No IPv6 address will be assigned
+Setting up share.ldb
+Setting up secrets.ldb
+Setting up the registry
+Setting up the privileges database
+Setting up idmap db
+Setting up SAM db
+Setting up sam.ldb partitions and settings
+Setting up sam.ldb rootDSE
+Pre-loading the Samba 4 and AD schema
+Adding DomainDN: &lt;span class=&quot;nv&quot;&gt;DC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ad,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ricosharp,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;com
+Adding configuration container
+Setting up sam.ldb schema
+Setting up sam.ldb configuration data
+Setting up display specifiers
+Modifying display specifiers
+Adding users container
+Modifying users container
+Adding computers container
+Modifying computers container
+Setting up sam.ldb data
+Setting up well known security principals
+Setting up sam.ldb users and groups
+Setting up self join
+Adding DNS accounts
+Creating &lt;span class=&quot;nv&quot;&gt;CN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;MicrosoftDNS,CN&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;System,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ad,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ricosharp,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;com
+Creating DomainDnsZones and ForestDnsZones partitions
+Populating DomainDnsZones and ForestDnsZones partitions
+Setting up sam.ldb rootDSE marking as synchronized
+Fixing provision GUIDs
+A Kerberos configuration suitable &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;Samba AD has been generated at /var/lib/samba/private/krb5.conf
+Setting up fake yp server settings
+Once the above files are installed, your Samba AD server will be ready to use
+Server Role:           active directory domain controller
+Hostname:              dc1
+NetBIOS Domain:        AD
+DNS Domain:            ad.ricosharp.com
+DOMAIN SID:            S-1-5-21-2060062981-3252955935-809771608&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Copy the provisioned kerberos configuration file to the kerberos configuration file location&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;cp /var/lib/samba/private/krb5.conf /etc&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;test-the-configuration&quot;&gt;Test the configuration&lt;/h2&gt;
+&lt;p&gt;Samba can now be run. But before setting up with systemd, start samba and run some tests with DNS.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;samba&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Test DNS&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;host &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; SRV _ldap._tcp.ad.ricosharp.com
+Host _ldap._tcp.ad.ricosharp.com not found: 3&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;NXDOMAIN&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;host &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; SRV _kerberos._udp.ad.ricosharp.com
+Host _kerberos._udp.ad.ricosharp.com not found: 3&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;NXDOMAIN&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;host &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; A dc1.ad.ricosharp.com
+dc1.ad.ricosharp.com has address 192.168.122.70&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This is not good as without DNS, AD will fail to run properly. If we run netstat to see what processes are listening on port 53, we can see that systemd-resolve is running in addition to samba.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;netstat &lt;span class=&quot;nt&quot;&gt;-tulpn&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; :53
+tcp        0      0 127.0.0.53:53           0.0.0.0:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;               LISTEN      688/systemd-resolve 
+tcp6       0      0 :::53                   :::&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;                    LISTEN      4368/samba          
+udp        0      0 127.0.0.53:53           0.0.0.0:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;                           688/systemd-resolve 
+udp6       0      0 :::53                   :::&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;                                4368/samba       &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;A quick and dirty way to make sure that samba is the only process listening to DNS queries is to disable the systemd-resolved service.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl stop systemd-resolved
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl disable systemd-resolved
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;unlink /etc/resolv.conf
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nano /etc/resolv.conf
+nameserver 192.168.122.70
+search ad.ricosharp.com
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;reboot&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Test DNS again. It looks like everything is now working.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;samba
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;host &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; SRV _ldap._tcp.ad.ricosharp.com
+_ldap._tcp.ad.ricosharp.com has SRV record 0 100 389 dc1.ad.ricosharp.com.
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;host &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; SRV _kerberos.udp.ad.ricosharp.com
+Host _kerberos.udp.ad.ricosharp.com not found: 3&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;NXDOMAIN&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;host &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; A dc1.ad.ricosharp.com
+dc1.ad.ricosharp.com has address 192.168.122.70&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Let’s also go ahead and test kerberos authentication. Everything here looks in order.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;kinit Administrator
+Password &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;Administrator@AD.RICOSHARP.COM: 
+Warning: Your password will expire &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;41 days on Sat 05 Oct 2019 04:12:28 PM UTC
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;klist
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: Administrator@AD.RICOSHARP.COM
+
+Valid starting       Expires              Service principal
+08/24/2019 16:42:07  08/25/2019 02:42:07  krbtgt/AD.RICOSHARP.COM@AD.RICOSHARP.COM
+	renew &lt;span class=&quot;k&quot;&gt;until &lt;/span&gt;08/25/2019 16:42:04&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;configure-samba-ad-to-start-with-systemd&quot;&gt;Configure samba AD to start with systemd&lt;/h2&gt;
+&lt;p&gt;Now that this is running, kill samba again so we can begin the process using systemd&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ps &lt;span class=&quot;nt&quot;&gt;-aux&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;samba
+root      1134  0.0  2.1 542992 44676 ?        Ss   16:34   0:00 samba
+root      1135  0.0  1.2 542992 25568 ?        S    16:34   0:00 samba
+root      1136  0.0  1.8 547144 37744 ?        S    16:34   0:00 samba
+root      1137  0.0  1.1 542996 22948 ?        S    16:34   0:00 samba
+root      1138  0.0  1.4 542992 28740 ?        S    16:34   0:00 samba
+root      1140  0.0  1.2 542992 25104 ?        S    16:34   0:00 samba
+root      1141  0.5  1.5 542992 32564 ?        S    16:34   0:01 samba
+root      1142  0.0  1.2 542992 25708 ?        S    16:34   0:00 samba
+root      1143  0.0  1.4 542992 29244 ?        S    16:34   0:00 samba
+root      1144  0.0  1.4 542992 28820 ?        S    16:34   0:00 samba
+root      1145  0.0  1.2 542992 25568 ?        S    16:34   0:00 samba
+root      1146  0.0  1.2 542992 25044 ?        S    16:34   0:00 samba
+root      1147  0.0  1.8 542992 38052 ?        S    16:34   0:00 samba
+root      1148  0.0  1.3 542992 27584 ?        S    16:34   0:00 samba
+root      1149  0.0  1.5 543412 31340 ?        S    16:34   0:00 samba
+root      1150  0.0  1.1 542996 22948 ?        S    16:34   0:00 samba
+rico      1198  0.0  0.0  13136  1004 pts/0    S+   16:38   0:00 &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--color&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;auto samba
+
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo kill &lt;/span&gt;1134
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ps &lt;span class=&quot;nt&quot;&gt;-aux&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;samba
+rico      1203  0.0  0.0  13136  1152 pts/0    S+   16:38   0:00 &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--color&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;auto samba&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Mask the smbd, nmbd, winbind services and unmask the samba-ad-dc service&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl mask smbd nmbd winbind
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl disable smbd nmbd winbind
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl stop smbd nmbd winbind
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl unmask samba-ad-dc
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl start samba-ad-dc
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;samba-ad-dc&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Reboot and test&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;reboot
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl status samba-ad-dc&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;join-a-computer-to-the-domain&quot;&gt;Join a computer to the domain&lt;/h2&gt;
+
+&lt;p&gt;To join the domain on a Windows 10 computer, do the following:&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note: Make sure that your DNS is pointing to dc1 (192.168.122.70)&lt;/em&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Go to Start &amp;gt; Settings&lt;/li&gt;
+  &lt;li&gt;Click Accounts&lt;/li&gt;
+  &lt;li&gt;Access Work or School&lt;/li&gt;
+  &lt;li&gt;Click Connect&lt;/li&gt;
+  &lt;li&gt;Click Join this device to a local Active Directory domain&lt;/li&gt;
+  &lt;li&gt;Type ad.ricosharp.com and enter the Administrator username/password for the domain&lt;/li&gt;
+  &lt;li&gt;Select Skip to Add an account&lt;/li&gt;
+  &lt;li&gt;Select Restart Now&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;An alternative way, and the way that I’m most used to is this:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Open the File Explorer&lt;/li&gt;
+  &lt;li&gt;Right click This PC &amp;gt; Properties&lt;/li&gt;
+  &lt;li&gt;Select Change settings under the Computer name, domain, and workgroup settings section&lt;/li&gt;
+  &lt;li&gt;Click the Change button&lt;/li&gt;
+  &lt;li&gt;Select Domain and enter ad.ricosharp.com&lt;/li&gt;
+  &lt;li&gt;Click ok, enter an Administrator username/password for the domain and reboot&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;create-a-user-account&quot;&gt;Create a user account&lt;/h2&gt;
+&lt;p&gt;There are two ways you can manage user accounts. Firstly, you can use samba-tool. For example, to create a new user called user1, issue the following 
+command:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;samba-tool user create user1&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The second way is to install the Remote System Administration Tools (RSAT) on a Windows 10 computer. You can download the RSAT from &lt;a href=&quot;https://www.microsoft.com/en-us/download/details.aspx?id=45520&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Once installed, open Active Directory Users and Computers from Start &amp;gt; Windows Administrative Tools. Expand the active directory domain name (ad.ricosharp.com) and open the Users organizational unit. Right click and select New &amp;gt; User.&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to build an Active Directory Domain Controller using Samba 4 on a linux host</summary></entry><entry><title type="html">Windows 10 deployment with Linux - Automating the Install</title><link href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install" rel="alternate" type="text/html" title="Windows 10 deployment with Linux - Automating the Install" /><published>2019-05-18T00:00:00-04:00</published><updated>2019-05-18T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install</id><content type="html" xml:base="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">&lt;p&gt;My &lt;a href=&quot;https://blog.ricosharp.com/posts/2019/Windows-deployment-with-Linux&quot;&gt;previous post&lt;/a&gt; about Windows 10 Deployment with Linux was focussed on how to get up and running. But the deployment process requires quite a bit of user interaction. For example, after network booting, you have to login to the deployment share. You then have to select the task sequence and set a bunch of other parameters. All of these steps can be automated to the point where there is zero user interaction.&lt;/p&gt;
 
 &lt;p&gt;In order to achieve a fully automated installation, you need to set some parameters in the CustomSettings.ini and Bootstrap.ini files. What these parameters do should be self evident in the configuration below.&lt;/p&gt;
 
@@ -697,4 +936,4 @@ OR
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;raspi-config
 3 Boot Options &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; B1 Desktop / CLI &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; B4 Desktop Autologin&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.</summary></entry><entry><title type="html">My First Jekyll Post</title><link href="http://localhost:4000/posts/2018/My-First-Jekyll-Post" rel="alternate" type="text/html" title="My First Jekyll Post" /><published>2018-05-06T00:00:00-04:00</published><updated>2018-05-06T00:00:00-04:00</updated><id>http://localhost:4000/posts/2018/My-First-Jekyll-Post</id><content type="html" xml:base="http://localhost:4000/posts/2018/My-First-Jekyll-Post">&lt;p&gt;Hello World!&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Hello World!</summary></entry></feed>
+&lt;p&gt;An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.</summary></entry></feed>

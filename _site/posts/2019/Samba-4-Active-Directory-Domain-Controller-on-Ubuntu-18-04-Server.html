@@ -1,0 +1,729 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.16.6 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server - Rico Sharp</title>
+<meta name="description" content="How to build an Active Directory Domain Controller using Samba 4 on a linux host">
+
+
+  <meta name="author" content="Rico Sharp">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Rico Sharp">
+<meta property="og:title" content="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server">
+<meta property="og:url" content="http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server">
+
+
+  <meta property="og:description" content="How to build an Active Directory Domain Controller using Samba 4 on a linux host">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2019-08-24T00:00:00-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Rico Sharp Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE ]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Rico Sharp
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about" >About</a>
+            </li><li class="masthead__menu-item">
+              <a href="http://resume.ricosharp.com" >Resume</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Rico Sharp" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Rico Sharp</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Washington, D.C.</span>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:rico.sharp@gmail.com">
+            <meta itemprop="email" content="rico.sharp@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/ricosharp" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server">
+    <meta itemprop="description" content="How to build an Active Directory Domain Controller using Samba 4 on a linux host">
+    <meta itemprop="datePublished" content="August 24, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  6 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>This post will outline how to install an Active Directory(AD) Domain Controller on Ubuntu Server 18.04. Yes, that’s right…Active Directory on a linux host. Not a backup domain controller but a functional AD that you can create users with, join computers to, and set up group policy.</p>
+
+<h2 id="network-configuration">Network configuration</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Hostname</th>
+      <th>Domain</th>
+      <th>IP Address</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>dc1</td>
+      <td>ad.ricosharp.com</td>
+      <td>192.168.122.70</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="configure-networking">Configure networking</h2>
+<p>Configure system hostname</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>hostnamectl set-hostname dc1</code></pre></figure>
+
+<p>Edit the hosts files so the hostname resolves to its IP address</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/hosts
+<span class="c"># Add this line to /etc/hosts so that dc1 resolves to 192.168.122.70</span>
+192.168.122.70  dc1 dc1.ad.ricosharp.com</code></pre></figure>
+
+<p><em>Note that Ubuntu 18.04 is now using netplan to configure IP addresses on systems. I will outline a basic configuration in a future post</em></p>
+
+<h2 id="update-system-and-install-required-packages">Update system and install required packages</h2>
+
+<p>Update and reboot the system</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>apt update <span class="nt">-y</span>
+~]<span class="nv">$ </span><span class="nb">sudo </span>apt upgrade <span class="nt">-y</span>
+~]<span class="nv">$ </span><span class="nb">sudo </span>reboot</code></pre></figure>
+
+<p>Install relevant samba, winbind, and kerberos packages. The installation will prompt for kerberos settings and will give an error at the end of installation. Ignore this for now and accept the defaults. This will be configured properly later as part of the AD installation.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>apt install samba smbclient winbind libpam-winbind libnss-winbind krb5-kdc libpam-krb5 <span class="nt">-y</span></code></pre></figure>
+
+<p>Rename samba and kerberos files. You need to start from a clean environment when starting the samba AD setup.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>mv /etc/samba/smb.conf /etc/samba/smb.conf.orig
+~]<span class="nv">$ </span><span class="nb">sudo </span>mv /etc/krb5.conf /etc/krb5.conf.orig</code></pre></figure>
+
+<h2 id="run-the-samba-ad-setup">Run the samba AD setup</h2>
+
+<p>All the default settings are fine. The only change I make is to set the DNS forwarder to 8.8.8.8. You can also use a different DNS backend. But this is out of the scope of this post for a simple setup.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>samba-tool domain provision <span class="nt">--use-rfc2307</span> <span class="nt">--interactive</span>
+Realm <span class="o">[</span>AD.RICOSHARP.COM]: 
+ Domain <span class="o">[</span>AD]: 
+ Server Role <span class="o">(</span>dc, member, standalone<span class="o">)</span> <span class="o">[</span>dc]: 
+ DNS backend <span class="o">(</span>SAMBA_INTERNAL, BIND9_FLATFILE, BIND9_DLZ, NONE<span class="o">)</span> <span class="o">[</span>SAMBA_INTERNAL]: 
+ DNS forwarder IP address <span class="o">(</span>write <span class="s1">'none'</span> to disable forwarding<span class="o">)</span> <span class="o">[</span>127.0.0.53]: 8.8.8.8
+Administrator password: 
+Retype password: 
+Looking up IPv4 addresses
+Looking up IPv6 addresses
+No IPv6 address will be assigned
+Setting up share.ldb
+Setting up secrets.ldb
+Setting up the registry
+Setting up the privileges database
+Setting up idmap db
+Setting up SAM db
+Setting up sam.ldb partitions and settings
+Setting up sam.ldb rootDSE
+Pre-loading the Samba 4 and AD schema
+Adding DomainDN: <span class="nv">DC</span><span class="o">=</span>ad,DC<span class="o">=</span>ricosharp,DC<span class="o">=</span>com
+Adding configuration container
+Setting up sam.ldb schema
+Setting up sam.ldb configuration data
+Setting up display specifiers
+Modifying display specifiers
+Adding users container
+Modifying users container
+Adding computers container
+Modifying computers container
+Setting up sam.ldb data
+Setting up well known security principals
+Setting up sam.ldb users and groups
+Setting up self join
+Adding DNS accounts
+Creating <span class="nv">CN</span><span class="o">=</span>MicrosoftDNS,CN<span class="o">=</span>System,DC<span class="o">=</span>ad,DC<span class="o">=</span>ricosharp,DC<span class="o">=</span>com
+Creating DomainDnsZones and ForestDnsZones partitions
+Populating DomainDnsZones and ForestDnsZones partitions
+Setting up sam.ldb rootDSE marking as synchronized
+Fixing provision GUIDs
+A Kerberos configuration suitable <span class="k">for </span>Samba AD has been generated at /var/lib/samba/private/krb5.conf
+Setting up fake yp server settings
+Once the above files are installed, your Samba AD server will be ready to use
+Server Role:           active directory domain controller
+Hostname:              dc1
+NetBIOS Domain:        AD
+DNS Domain:            ad.ricosharp.com
+DOMAIN SID:            S-1-5-21-2060062981-3252955935-809771608</code></pre></figure>
+
+<p>Copy the provisioned kerberos configuration file to the kerberos configuration file location</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>cp /var/lib/samba/private/krb5.conf /etc</code></pre></figure>
+
+<h2 id="test-the-configuration">Test the configuration</h2>
+<p>Samba can now be run. But before setting up with systemd, start samba and run some tests with DNS.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>samba</code></pre></figure>
+
+<p>Test DNS</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>host <span class="nt">-t</span> SRV _ldap._tcp.ad.ricosharp.com
+Host _ldap._tcp.ad.ricosharp.com not found: 3<span class="o">(</span>NXDOMAIN<span class="o">)</span>
+~]<span class="nv">$ </span>host <span class="nt">-t</span> SRV _kerberos._udp.ad.ricosharp.com
+Host _kerberos._udp.ad.ricosharp.com not found: 3<span class="o">(</span>NXDOMAIN<span class="o">)</span>
+~]<span class="nv">$ </span>host <span class="nt">-t</span> A dc1.ad.ricosharp.com
+dc1.ad.ricosharp.com has address 192.168.122.70</code></pre></figure>
+
+<p>This is not good as without DNS, AD will fail to run properly. If we run netstat to see what processes are listening on port 53, we can see that systemd-resolve is running in addition to samba.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>netstat <span class="nt">-tulpn</span> | <span class="nb">grep</span> :53
+tcp        0      0 127.0.0.53:53           0.0.0.0:<span class="k">*</span>               LISTEN      688/systemd-resolve 
+tcp6       0      0 :::53                   :::<span class="k">*</span>                    LISTEN      4368/samba          
+udp        0      0 127.0.0.53:53           0.0.0.0:<span class="k">*</span>                           688/systemd-resolve 
+udp6       0      0 :::53                   :::<span class="k">*</span>                                4368/samba       </code></pre></figure>
+
+<p>A quick and dirty way to make sure that samba is the only process listening to DNS queries is to disable the systemd-resolved service.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl stop systemd-resolved
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl disable systemd-resolved
+~]<span class="nv">$ </span><span class="nb">sudo </span>unlink /etc/resolv.conf
+~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/resolv.conf
+nameserver 192.168.122.70
+search ad.ricosharp.com
+~]<span class="nv">$ </span><span class="nb">sudo </span>reboot</code></pre></figure>
+
+<p>Test DNS again. It looks like everything is now working.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>samba
+~]<span class="nv">$ </span>host <span class="nt">-t</span> SRV _ldap._tcp.ad.ricosharp.com
+_ldap._tcp.ad.ricosharp.com has SRV record 0 100 389 dc1.ad.ricosharp.com.
+~]<span class="nv">$ </span>host <span class="nt">-t</span> SRV _kerberos.udp.ad.ricosharp.com
+Host _kerberos.udp.ad.ricosharp.com not found: 3<span class="o">(</span>NXDOMAIN<span class="o">)</span>
+~]<span class="nv">$ </span>host <span class="nt">-t</span> A dc1.ad.ricosharp.com
+dc1.ad.ricosharp.com has address 192.168.122.70</code></pre></figure>
+
+<p>Let’s also go ahead and test kerberos authentication. Everything here looks in order.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>kinit Administrator
+Password <span class="k">for </span>Administrator@AD.RICOSHARP.COM: 
+Warning: Your password will expire <span class="k">in </span>41 days on Sat 05 Oct 2019 04:12:28 PM UTC
+~]<span class="nv">$ </span>klist
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: Administrator@AD.RICOSHARP.COM
+
+Valid starting       Expires              Service principal
+08/24/2019 16:42:07  08/25/2019 02:42:07  krbtgt/AD.RICOSHARP.COM@AD.RICOSHARP.COM
+	renew <span class="k">until </span>08/25/2019 16:42:04</code></pre></figure>
+
+<h2 id="configure-samba-ad-to-start-with-systemd">Configure samba AD to start with systemd</h2>
+<p>Now that this is running, kill samba again so we can begin the process using systemd</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>ps <span class="nt">-aux</span> | <span class="nb">grep </span>samba
+root      1134  0.0  2.1 542992 44676 ?        Ss   16:34   0:00 samba
+root      1135  0.0  1.2 542992 25568 ?        S    16:34   0:00 samba
+root      1136  0.0  1.8 547144 37744 ?        S    16:34   0:00 samba
+root      1137  0.0  1.1 542996 22948 ?        S    16:34   0:00 samba
+root      1138  0.0  1.4 542992 28740 ?        S    16:34   0:00 samba
+root      1140  0.0  1.2 542992 25104 ?        S    16:34   0:00 samba
+root      1141  0.5  1.5 542992 32564 ?        S    16:34   0:01 samba
+root      1142  0.0  1.2 542992 25708 ?        S    16:34   0:00 samba
+root      1143  0.0  1.4 542992 29244 ?        S    16:34   0:00 samba
+root      1144  0.0  1.4 542992 28820 ?        S    16:34   0:00 samba
+root      1145  0.0  1.2 542992 25568 ?        S    16:34   0:00 samba
+root      1146  0.0  1.2 542992 25044 ?        S    16:34   0:00 samba
+root      1147  0.0  1.8 542992 38052 ?        S    16:34   0:00 samba
+root      1148  0.0  1.3 542992 27584 ?        S    16:34   0:00 samba
+root      1149  0.0  1.5 543412 31340 ?        S    16:34   0:00 samba
+root      1150  0.0  1.1 542996 22948 ?        S    16:34   0:00 samba
+rico      1198  0.0  0.0  13136  1004 pts/0    S+   16:38   0:00 <span class="nb">grep</span> <span class="nt">--color</span><span class="o">=</span>auto samba
+
+~]<span class="nv">$ </span><span class="nb">sudo kill </span>1134
+~]<span class="nv">$ </span><span class="nb">sudo </span>ps <span class="nt">-aux</span> | <span class="nb">grep </span>samba
+rico      1203  0.0  0.0  13136  1152 pts/0    S+   16:38   0:00 <span class="nb">grep</span> <span class="nt">--color</span><span class="o">=</span>auto samba</code></pre></figure>
+
+<p>Mask the smbd, nmbd, winbind services and unmask the samba-ad-dc service</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl mask smbd nmbd winbind
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl disable smbd nmbd winbind
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl stop smbd nmbd winbind
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl unmask samba-ad-dc
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl start samba-ad-dc
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl <span class="nb">enable </span>samba-ad-dc</code></pre></figure>
+
+<p>Reboot and test</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>reboot
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl status samba-ad-dc</code></pre></figure>
+
+<h2 id="join-a-computer-to-the-domain">Join a computer to the domain</h2>
+
+<p>To join the domain on a Windows 10 computer, do the following:</p>
+
+<p><em>Note: Make sure that your DNS is pointing to dc1 (192.168.122.70)</em></p>
+
+<ol>
+  <li>Go to Start &gt; Settings</li>
+  <li>Click Accounts</li>
+  <li>Access Work or School</li>
+  <li>Click Connect</li>
+  <li>Click Join this device to a local Active Directory domain</li>
+  <li>Type ad.ricosharp.com and enter the Administrator username/password for the domain</li>
+  <li>Select Skip to Add an account</li>
+  <li>Select Restart Now</li>
+</ol>
+
+<p>An alternative way, and the way that I’m most used to is this:</p>
+
+<ol>
+  <li>Open the File Explorer</li>
+  <li>Right click This PC &gt; Properties</li>
+  <li>Select Change settings under the Computer name, domain, and workgroup settings section</li>
+  <li>Click the Change button</li>
+  <li>Select Domain and enter ad.ricosharp.com</li>
+  <li>Click ok, enter an Administrator username/password for the domain and reboot</li>
+</ol>
+
+<h2 id="create-a-user-account">Create a user account</h2>
+<p>There are two ways you can manage user accounts. Firstly, you can use samba-tool. For example, to create a new user called user1, issue the following 
+command:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>samba-tool user create user1</code></pre></figure>
+
+<p>The second way is to install the Remote System Administration Tools (RSAT) on a Windows 10 computer. You can download the RSAT from <a href="https://www.microsoft.com/en-us/download/details.aspx?id=45520">here</a></p>
+
+<p>Once installed, open Active Directory Users and Computers from Start &gt; Windows Administrative Tools. Expand the active directory domain name (ad.ricosharp.com) and open the Users organizational unit. Right click and select New &gt; User.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-08-24T00:00:00-04:00">August 24, 2019</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/posts/2019/Windows-deployment-with-Linux-Automating-the-Install" class="pagination--pager" title="Windows 10 deployment with Linux - Automating the Install
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Windows-deployment-with-Linux-Automating-the-Install" rel="permalink">Windows 10 deployment with Linux - Automating the Install
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Windows-deployment-with-Linux-Initial-Setup" rel="permalink">Windows 10 deployment with Linux - Initial Setup
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  7 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Private-VLANs-on-a-Cisco-switch" rel="permalink">Private VLAN’s on a Cisco switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to configure Private VLAN’s on a Cisco switch
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Fedora-30-Customization" rel="permalink">Fedora 30 Customization
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  less than 1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A script I use to customize my Fedora 30 environment
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2019 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
