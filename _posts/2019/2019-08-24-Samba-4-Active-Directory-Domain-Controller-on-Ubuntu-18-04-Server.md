@@ -248,3 +248,8 @@ command:
 The second way is to install the Remote System Administration Tools (RSAT) on a Windows 10 computer. You can download the RSAT from [here](https://www.microsoft.com/en-us/download/details.aspx?id=45520)
 
 Once installed, open Active Directory Users and Computers from Start > Windows Administrative Tools. Expand the active directory domain name (ad.ricosharp.com) and open the Users organizational unit. Right click and select New > User.
+
+## References
+[Setting up Samba as an Active Directory Domain Controller](https://wiki.samba.org/index.php/Setting_up_Samba_as_an_Active_Directory_Domain_Controller)
+
+[Managing the Samba AD DC Service Using Systemd](https://wiki.samba.org/index.php/Managing_the_Samba_AD_DC_Service_Using_Systemd)
