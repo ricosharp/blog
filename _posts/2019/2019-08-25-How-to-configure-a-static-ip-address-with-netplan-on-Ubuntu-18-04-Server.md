@@ -21,7 +21,7 @@ To my surprise a message in /etc/network/interfaces says that ifupdown has been 
 First, issue these commands: 
 
 {% highlight bash %}
-~]$ sudo rm /etc/50-cloud-init.yaml
+~]$ sudo rm /etc/netplan/50-cloud-init.yaml
 ~]$ sudo nano /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
 #Add this line:
 network: {config: disabled}
