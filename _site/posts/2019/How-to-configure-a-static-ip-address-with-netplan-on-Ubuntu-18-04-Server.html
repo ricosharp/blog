@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Windows 10 deployment with Linux - Automating the Install - Rico Sharp</title>
-<meta name="description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
+<!-- begin _includes/seo.html --><title>How to configure a static IP address with netplan on Ubuntu 18.04 Server - Rico Sharp</title>
+<meta name="description" content="This post will show you how to configure a static IP address with netplan on Ubuntu 18.04 Server">
 
 
   <meta name="author" content="Rico Sharp">
@@ -19,30 +19,30 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Rico Sharp">
-<meta property="og:title" content="Windows 10 deployment with Linux - Automating the Install">
-<meta property="og:url" content="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">
+<meta property="og:title" content="How to configure a static IP address with netplan on Ubuntu 18.04 Server">
+<meta property="og:url" content="http://localhost:4000/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server">
 
 
-  <meta property="og:description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
-
-
-
-
-
-
-
-  <meta property="article:published_time" content="2019-05-18T00:00:00-04:00">
+  <meta property="og:description" content="This post will show you how to configure a static IP address with netplan on Ubuntu 18.04 Server">
 
 
 
 
 
-  
+
+
+  <meta property="article:published_time" content="2019-08-25T00:00:00-04:00">
+
+
+
+
 
   
 
+  
 
-<link rel="canonical" href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server">
 
 
 
@@ -268,15 +268,15 @@
 
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Windows 10 deployment with Linux - Automating the Install">
-    <meta itemprop="description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
-    <meta itemprop="datePublished" content="May 18, 2019">
+    <meta itemprop="headline" content="How to configure a static IP address with netplan on Ubuntu 18.04 Server">
+    <meta itemprop="description" content="This post will show you how to configure a static IP address with netplan on Ubuntu 18.04 Server">
+    <meta itemprop="datePublished" content="August 25, 2019">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">Windows 10 deployment with Linux - Automating the Install
+          <h1 id="page-title" class="page__title" itemprop="headline">How to configure a static IP address with netplan on Ubuntu 18.04 Server
 </h1>
           
             <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
@@ -292,63 +292,62 @@
 
       <section class="page__content" itemprop="text">
         
-        <p>My <a href="https://blog.ricosharp.com/posts/2019/Windows-deployment-with-Linux">previous post</a> about Windows 10 Deployment with Linux was focussed on how to get up and running. But the deployment process requires quite a bit of user interaction. For example, after network booting, you have to login to the deployment share. You then have to select the task sequence and set a bunch of other parameters. All of these steps can be automated to the point where there is zero user interaction.</p>
+        <p>I’ve only just begun using Ubuntu 18.04 server and one of the very first things I noticed was that network configuration is now done using netplan. I’m so used to doing the following:</p>
 
-<p>In order to achieve a fully automated installation, you need to set some parameters in the CustomSettings.ini and Bootstrap.ini files. What these parameters do should be self evident in the configuration below.</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/network/interfaces
+auto ens3
+iface ens3 inet static
+    address 192.168.122.100
+    netmask 255.255.255.0
+    gateway 192.168.122.1
+    dns-nameservers 8.8.8.8
+~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl restart networking</code></pre></figure>
 
-<p>My personal preference is not to fully automate a deployment. This gives you a way out if you accidentally network boot into the Windows PE environment, which would then automatically begin the Task Sequence. What I prefer to do force a page from the wizard to show, such as the Task Sequence selection (SkipTaskSequence=NO).</p>
+<p>To my surprise a message in /etc/network/interfaces says that ifupdown has been replaced by netplan. It turns out that although it’s a new way of configuring network settings, it isn’t all that hard.</p>
 
-<h2 id="customsettingsini">CustomSettings.ini</h2>
+<p>First, issue these commands:</p>
 
-<p>There are two ways to edit this file:</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>rm /etc/netplan/50-cloud-init.yaml
+~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+<span class="c">#Add this line:</span>
+network: <span class="o">{</span>config: disabled<span class="o">}</span></code></pre></figure>
 
-<ol>
-  <li>Open \\%DeployRoot%\Control\CustomSettings.ini with a text editor such as notepad.</li>
-  <li>In the Deployment Workbench, right click your Deployment Share then select properties. The CustomSettings.ini file can be edited from the Rules tab.</li>
-</ol>
+<p>All the above commands do are disable cloud-init’s network configuration capabilities. If you reboot with the above configuration, you will have no network. To set a static IP address, create a new YAML file with the following:</p>
 
-<figure class="highlight"><pre><code class="language-text" data-lang="text">[Settings]
-Priority=Default
-Properties=MyCustomProperty
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/netplan/ens3.yaml
+<span class="c"># Indents must be spaces when using YAML, not tabs.</span>
+network:
+    version: 2
+    ethernets:
+        ens3:
+            dhcp4: no
+            addresses: <span class="o">[</span>192.168.122.100/24]
+            gateway4: 192.168.122.1
+            nameservers:
+                addresses: <span class="o">[</span>8.8.8.8]</code></pre></figure>
 
-[Default]
-OSInstall=Y
-SkipCapture=YES
-SkipAdminPassword=YES
-SkipProductKey=YES
-SkipComputerBackup=YES
-SkipBitLocker=YES
-SkipTaskSequence=YES
-TaskSequenceID="Windows 10 Deployment"
-SkipComputerName=YES
-SkipDomainMembership=YES
-SkipUserData=YES
-SkipLocaleSelection=YES
-TimeZoneName="Eastern Standard Time"
-SkipTimeZone=YES
-SkipSummary=YES</code></pre></figure>
+<p>Now check the settings are ok in this file:</p>
 
-<h2 id="booststrapini">Booststrap.ini</h2>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>netplan try</code></pre></figure>
 
-<p>There are two ways to edit this file:</p>
+<p>If everything is ok you have the option to immediately apply the settings by pressing Enter.</p>
 
-<ol>
-  <li>Open \\%DeployRoot%\Control\Bootstrap.ini with a text editor such as notepad.</li>
-  <li>In the Deployment Workbench, right click your Deployment Share then select properties. Select the Rules tab then click Edit Bootstrap.ini.</li>
-</ol>
+<p>If you want to use a dynamic IP address instead, all you need to change in the above configuration is dhcp4: yes, then remove everything below it:</p>
 
-<figure class="highlight"><pre><code class="language-text" data-lang="text">[Settings]
-Priority=Default
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/netplan/ens3.yaml
+<span class="c"># Indents must be spaces when using YAML, not tabs.</span>
+network:
+    version: 2
+    ethernets:
+        ens3:
+            dhcp4: no            </code></pre></figure>
 
-[Default]
-DeployRoot=\\192.168.122.100\mdt$
-UserID=mdtread
-UserPassword=password
-UserDomain=192.168.122.100
-SkipBDDWelcome=YES</code></pre></figure>
+<p>Again, check the settings are ok, then press Enter.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>netplan try</code></pre></figure>
 
 <h2 id="references">References</h2>
-<p><a href="https://docs.microsoft.com/en-us/sccm/mdt/toolkit-reference">Toolkit Reference for the Microsoft Deployment Toolkit</a></p>
+<p><a href="https://netplan.io/examples">Netplan Examples</a></p>
 
         
       </section>
@@ -359,7 +358,7 @@ SkipBDDWelcome=YES</code></pre></figure>
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-18T00:00:00-04:00">May 18, 2019</time></p>
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-08-25T00:00:00-04:00">August 25, 2019</time></p>
         
       </footer>
 
@@ -368,11 +367,11 @@ SkipBDDWelcome=YES</code></pre></figure>
       
   <nav class="pagination">
     
-      <a href="/posts/2019/Windows-deployment-with-Linux-Initial-Setup" class="pagination--pager" title="Windows 10 deployment with Linux - Initial Setup
+      <a href="/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" class="pagination--pager" title="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
 ">Previous</a>
     
     
-      <a href="/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" class="pagination--pager" title="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
+      <a href="/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7" class="pagination--pager" title="Up and running with Apache Guacamole on CentOS 7
 ">Next</a>
     
   </nav>
@@ -425,7 +424,7 @@ SkipBDDWelcome=YES</code></pre></figure>
     
     <h2 class="archive__item-title" itemprop="headline">
       
-        <a href="/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server" rel="permalink">How to configure a static IP address with netplan on Ubuntu 18.04 Server
+        <a href="/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" rel="permalink">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
 </a>
       
     </h2>
@@ -435,10 +434,10 @@ SkipBDDWelcome=YES</code></pre></figure>
 
 
 
-  1 minute read
+  6 minute read
 </p>
     
-    <p class="archive__item-excerpt" itemprop="description">This post will show you how to configure a static IP address with netplan on Ubuntu 18.04 Server
+    <p class="archive__item-excerpt" itemprop="description">How to build an Active Directory Domain Controller using Samba 4 on a linux host
 </p>
   </article>
 </div>
@@ -453,7 +452,7 @@ SkipBDDWelcome=YES</code></pre></figure>
     
     <h2 class="archive__item-title" itemprop="headline">
       
-        <a href="/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" rel="permalink">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
+        <a href="/posts/2019/Windows-deployment-with-Linux-Automating-the-Install" rel="permalink">Windows 10 deployment with Linux - Automating the Install
 </a>
       
     </h2>
@@ -463,10 +462,10 @@ SkipBDDWelcome=YES</code></pre></figure>
 
 
 
-  7 minute read
+  1 minute read
 </p>
     
-    <p class="archive__item-excerpt" itemprop="description">How to build an Active Directory Domain Controller using Samba 4 on a linux host
+    <p class="archive__item-excerpt" itemprop="description">A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process
 </p>
   </article>
 </div>

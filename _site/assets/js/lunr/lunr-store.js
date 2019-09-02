@@ -53,4 +53,14 @@ var store = [{
         "excerpt":"This post will outline how to install an Active Directory(AD) Domain Controller on Ubuntu Server 18.04. Yes, that’s right…Active Directory on a linux host. Not a backup domain controller but a functional AD that you can create users with, join computers to, and set up group policy. Network configuration Hostname...","categories": [],
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server",
+        "teaser":null},{
+        "title": "How to configure a static IP address with netplan on Ubuntu 18.04 Server",
+        "excerpt":"I’ve only just begun using Ubuntu 18.04 server and one of the very first things I noticed was that network configuration is now done using netplan. I’m so used to doing the following: ~]$ sudo nano /etc/network/interfaces auto ens3 iface ens3 inet static address 192.168.122.100 netmask 255.255.255.0 gateway 192.168.122.1 dns-nameservers...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server",
+        "teaser":null},{
+        "title": "Up and running with Apache Guacamole on CentOS 7",
+        "excerpt":"Apache Guacamole is an open source, clientless remote access gateway. It can be used to establish remote sessions over various protocols through a web browser. Below I will set up Apache Guacamole with authentication against Active Directory (AD) through Lightweight Directory Access Protocol (LDAP). After this I will configure a...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7",
         "teaser":null}]

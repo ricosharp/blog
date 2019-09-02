@@ -1,4 +1,269 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-08-24T16:41:03-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server</title><link href="http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" rel="alternate" type="text/html" title="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server" /><published>2019-08-24T00:00:00-04:00</published><updated>2019-08-24T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server</id><content type="html" xml:base="http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server">&lt;p&gt;This post will outline how to install an Active Directory(AD) Domain Controller on Ubuntu Server 18.04. Yes, that’s right…Active Directory on a linux host. Not a backup domain controller but a functional AD that you can create users with, join computers to, and set up group policy.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-09-02T02:24:25-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Up and running with Apache Guacamole on CentOS 7</title><link href="http://localhost:4000/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7" rel="alternate" type="text/html" title="Up and running with Apache Guacamole on CentOS 7" /><published>2019-09-02T00:00:00-04:00</published><updated>2019-09-02T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7</id><content type="html" xml:base="http://localhost:4000/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7">&lt;p&gt;Apache Guacamole is an open source, clientless remote access gateway. It can be used to establish remote sessions over various protocols through a web browser. Below I will set up Apache Guacamole with authentication against Active Directory (AD) through Lightweight Directory Access Protocol (LDAP).&lt;/p&gt;
+
+&lt;p&gt;After this I will configure a Windows 10 Pro machine in two ways; Remote Desktop Protocol (RDP) and RemoteApp. The difference between the two is RDP offers a full desktop whereas RemoteApp will present a single application.&lt;/p&gt;
+
+&lt;p&gt;In this article I will continue to use the AD environment from my &lt;a href=&quot;https://blog.ricosharp.com/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server&quot;&gt;Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
+&lt;/a&gt; post.&lt;/p&gt;
+
+&lt;p&gt;The Apache Guacamole machine I will be using is a minimal installation of Centos 7 with an IP address of 192.168.122.75 and hostname of guacamole.&lt;/p&gt;
+
+&lt;h2 id=&quot;add-dns-entry-for-guacamole-machine&quot;&gt;Add DNS entry for Guacamole machine&lt;/h2&gt;
+&lt;p&gt;On DC1, the domain controller, add a DNS record for the Apache Guacamole machine.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;samba-tool dns add 192.168.122.70 ad.ricosharp.com guacamole A 192.168.122.75&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;em&gt;Make sure your Unix user has an account in AD so you can authenticate. The account I am using has been added as a Domain Administrator&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;If you skip this step, you can just access the Guacamole machine through its IP address.&lt;/p&gt;
+
+&lt;h2 id=&quot;trusted-certificates-for-ldap&quot;&gt;Trusted Certificates for LDAP&lt;/h2&gt;
+
+&lt;p&gt;You will need the public certificate of your domain controller (DC1) since we will be using LDAPS. Samba creates a self signed certificate when provisioning a domain controller in /var/lib/samba/private/tls called ca.pem. This will need to be copied to the CentOS 7 server. Here I also add it as a trusted certificate on the guacamole machine and test that it works.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;DC1&lt;/strong&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;scp /var/lib/samba/private/tls/ca.pem root@guacamole.ad.ricosharp.com:/etc/pki/ca-trust/source/anchors/ca.pem&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;strong&gt;GUACAMOLE&lt;/strong&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# update-ca-trust extract
+~]# openssl s_client &lt;span class=&quot;nt&quot;&gt;-connect&lt;/span&gt; dc1.ad.ricosharp.com:636&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The result will say ok. If you get a message saying unable to verify then the certificate has not been added properly.&lt;/p&gt;
+
+&lt;p&gt;Next you will need to create an LDAP bind user in AD. I just create a standard user called ldapbind through Active Directory Users and Computers.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/ad-ldap-bind-user.png&quot; alt=&quot;AD LDAP Bind User&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;GUACAMOLE&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Now, test that you can actually connect to AD with LDAPS. You will be prompted for the ldapbind user’s password and&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum install openldap-clients &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
+~]# ldapsearch &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; ldaps://dc1.ad.ricosharp.com:636 &lt;span class=&quot;nt&quot;&gt;-D&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;CN&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ldapbind,CN&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;Users,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ad,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ricosharp,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;com &lt;span class=&quot;nt&quot;&gt;-W&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-b&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;DC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ad,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;ricosharp,DC&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;com&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If sucessful, the query will return some AD information. You should The machine is now ready to have Apache Guacamole installed.&lt;/p&gt;
+
+&lt;h2 id=&quot;guacamole-installation&quot;&gt;Guacamole Installation&lt;/h2&gt;
+&lt;p&gt;The easiest way to get up and running is to use a script, like this one &lt;a href=&quot;https://github.com/Zer0CoolX/guacamole-install-rhel/blob/master/guac-install.sh&quot;&gt;here&lt;/a&gt; by &lt;a href=&quot;https://github.com/Zer0CoolX&quot;&gt;Zer0CoolX&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Download the script, give it execute permissions, and run it.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum install wget &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
+~]# wget https://raw.githubusercontent.com/Zer0CoolX/guacamole-install-rhel/master/guac-install.sh
+~]# chmod +x guac-install.sh
+~]# ./guac-install.sh&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Follow the prompts to install. Below are the main settings to specify:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Self-signed certificate&lt;/li&gt;
+  &lt;li&gt;Hostname - guacamole&lt;/li&gt;
+  &lt;li&gt;LDAP(S)&lt;/li&gt;
+  &lt;li&gt;yes to LDAPS&lt;/li&gt;
+  &lt;li&gt;Certificate filename: ca.pem&lt;/li&gt;
+  &lt;li&gt;Certificate path: /etc/pki/ca-trust/source/anchors/&lt;/li&gt;
+  &lt;li&gt;LDAP Server Hostname: ad.ricosharp.com&lt;/li&gt;
+  &lt;li&gt;LDAP User Base DN: DC=ad,DC=ricosharp,DC=com&lt;/li&gt;
+  &lt;li&gt;LDAP Search Bind DN: CN=ldapbind,CN=Users,DC=ad,DC=ricosharp,DC=com&lt;/li&gt;
+  &lt;li&gt;No 2FA&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Select option 8 to begin installation. The script recommends a reboot once installation completes.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# reboot&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;After rebooting, you can access the web front end through either the hostname or IP address in a web browser.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/guacamole-ui.png&quot; alt=&quot;Guacamole UI&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The default administrator username/password is guacadmin/guacadmin.&lt;/p&gt;
+
+&lt;h2 id=&quot;linking-ad-accounts&quot;&gt;Linking AD Accounts&lt;/h2&gt;
+
+&lt;p&gt;The default guacadmin user can only access users stored in the local database. You need to add an AD user in order view and grant AD accounts access to remote sessions.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Log in to web interface using the default username/password&lt;/li&gt;
+  &lt;li&gt;Click guacadmin at the top right hand corner of the page and select Settings&lt;/li&gt;
+  &lt;li&gt;Click the Users tab&lt;/li&gt;
+  &lt;li&gt;Select New User&lt;/li&gt;
+  &lt;li&gt;Enter an AD username/password. This can be a standard user account in AD&lt;/li&gt;
+  &lt;li&gt;Check all the permissions options to make this user an administrator&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Log out and log back in under the AD account. You will now be able to see AD accounts under Settings &amp;gt; Users.&lt;/p&gt;
+
+&lt;h2 id=&quot;windows-10-remote-desktop-protocol&quot;&gt;Windows 10 Remote Desktop Protocol&lt;/h2&gt;
+
+&lt;p&gt;The Windows 10 Pro machine I am using is connected to AD with an IP address of 192.168.122.90 obtained through DHCP.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Windows 10 Machine&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;First, configure the Window 10 computer to allow RDP.&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Open File Explorer&lt;/li&gt;
+  &lt;li&gt;Right click This PC &amp;gt; Properties&lt;/li&gt;
+  &lt;li&gt;Click Remote Settings&lt;/li&gt;
+  &lt;li&gt;Click Allow remote connections to this computer and click Select Users&lt;/li&gt;
+  &lt;li&gt;Add Domain Users to this list
+&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/rdp-setup.png&quot; alt=&quot;RDP Setup&quot; /&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;Guacamole UI&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Next we need to add the machine to guacamole. Log into the guacamole UI and the administrator account that has access to AD users.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Click the username at the top right corner of the page &amp;gt; Settings&lt;/li&gt;
+  &lt;li&gt;Click the Connections tab&lt;/li&gt;
+  &lt;li&gt;Click New Connection&lt;/li&gt;
+  &lt;li&gt;Give the connection a name and select RDP as the protocol&lt;/li&gt;
+  &lt;li&gt;In the Network section under Parameters, enter either the hostname or IP and RDP port (default 3389)&lt;/li&gt;
+  &lt;li&gt;Under Authentication use ${GUAC_USERNAME} as the username and ${GUAC_PASSWORD} as the password.&lt;/li&gt;
+  &lt;li&gt;Enter the domain name and security mode&lt;/li&gt;
+  &lt;li&gt;Select Ignore server certificate&lt;/li&gt;
+  &lt;li&gt;Scroll to the bottom of the page and click Save&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/rdp-parameters.png&quot; alt=&quot;RDP Parameters&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A couple of points to make about the configuration above. Step 6 takes the credentials of the current logged  in user (${GUAC_USERNAME} and ${GUAC_PASSWORD})and passes it through to the Windows 10 RDP session for log in. So if johndoe logs into the guacamole UI and can see the Windows 10 machine advertised, it will log into that RDP session with his johndoe AD credentials.&lt;/p&gt;
+
+&lt;p&gt;At step 8 we selected to ignore server certificates, as I do not have certificates set up. When connecting to an RDP session using the Windows RDP client, you will be prompted with a message saying the certificate is not trusted. Apache Guacamole does not do this and will fail to connect instead. Checking Ignore server certificate bypasses this.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Advertise RDP Connection&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Now you need to actually advertise this connection to the users who should have access. To keep this simple, I’m going to advertise to a single user. Using the AD Administrator account within the guacamole UI, do the following.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Click the username at the top right corner of the page &amp;gt; Settings&lt;/li&gt;
+  &lt;li&gt;Click the Users tab&lt;/li&gt;
+  &lt;li&gt;Select the User who you want to advertise the RDP session to&lt;/li&gt;
+  &lt;li&gt;Under Connections, click All Connections and check the box of the RDP session that was created&lt;/li&gt;
+  &lt;li&gt;Click Save&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;You can now log out and log back in as this user and an RDP session will start automatically.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note that on a standard Windows computer, RDP is only limited to one logged in user at a time.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/guac-rdp-session.png&quot; alt=&quot;Guacamole RDP Session&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;remoteapps&quot;&gt;RemoteApps&lt;/h2&gt;
+&lt;p&gt;RemoteApps is a great way of running a single application through an RDP session. The application is the only window that will show. There will be no start menu or desktop, just the application.&lt;/p&gt;
+
+&lt;p&gt;In order to use RemoteApps under Windows 10 Pro, you need to make a slight change in the registry. On the machine that the RemoteApp will be running:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Open the registry through Start &amp;gt; Run &amp;gt; regedit&lt;/li&gt;
+  &lt;li&gt;Navigate to HKEY_LOCAL_MACHINE\SOFTWARE\Microsot\Windows NT\CurrentVersion\Terminal Server\TSAppAllowList&lt;/li&gt;
+  &lt;li&gt;Select fDisabledAllowList and change the value from 0 to 1&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/remoteapp-registry.png&quot; alt=&quot;RemoteApp Registry&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now advertise the RemoteApp as a new connection in guacamole. Here I will be advertising notepad using the same Windows 10 machine above:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Log in as the AD Administrator account within the guacamole UI&lt;/li&gt;
+  &lt;li&gt;Click the username at the top right corner of the page &amp;gt; Settings&lt;/li&gt;
+  &lt;li&gt;Select the Connection tab and choose New Connection&lt;/li&gt;
+  &lt;li&gt;Give the connection a name and make sure you select RDP as the protocol&lt;/li&gt;
+  &lt;li&gt;In the Network section under Parameters, enter either the hostname or IP and RDP port (default 3389)&lt;/li&gt;
+  &lt;li&gt;Under Authentication use ${GUAC_USERNAME} as the username and ${GUAC_PASSWORD} as the password.&lt;/li&gt;
+  &lt;li&gt;Enter the domain name and security mode&lt;/li&gt;
+  &lt;li&gt;Select Ignore server certificate&lt;/li&gt;
+  &lt;li&gt;In the RemoteApp section enter the path of notepad (C:\Windows\system32\notepad.exe) in the Program textbox&lt;/li&gt;
+  &lt;li&gt;Scroll to the bottom of the page and click Save&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/rdp-remoteapp.png&quot; alt=&quot;RDP RemoteApp&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Advertise RemoteApp&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;As with the RDP session above, you need to advertise the RemoteApp RDP session&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Log in as the AD Administrator account within the guacamole UI&lt;/li&gt;
+  &lt;li&gt;Click the username at the top right corner of the page &amp;gt; Settings&lt;/li&gt;
+  &lt;li&gt;Click the Users tab&lt;/li&gt;
+  &lt;li&gt;Select the User who you want to advertise the RemoteApp RDP session to&lt;/li&gt;
+  &lt;li&gt;Under Connections, click All Connections and check the box of the RemoteApp RDP session just created&lt;/li&gt;
+  &lt;li&gt;Click Save&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now log in under the user the RemoteApp was advertised to and notepad will start automatically.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2019/remoteapp-notepad.png&quot; alt=&quot;RemoteApp Notepad&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://github.com/Zer0CoolX/guacamole-install-rhel&quot;&gt;Apache Guacamole install script for RHEL 7/CentOS 7&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;http://www.sbsfaq.com/the-following-remoteapp-program-is-not-in-the-list-of-authorized-programs-on-windows-essential-server/&quot;&gt;The following RemoteApp program is not in the list of authorized programs on Windows Essential Server&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;Guacamole Apache LDAP Assignment&quot;&gt;https://serverfault.com/questions/965941/guacamole-apache-ldap-assignment&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to setup a clientless remote access gateway using CentOS 7 and Apache Guacamole with AD authentication, Windows RDP, and Remote Apps</summary></entry><entry><title type="html">How to configure a static IP address with netplan on Ubuntu 18.04 Server</title><link href="http://localhost:4000/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server" rel="alternate" type="text/html" title="How to configure a static IP address with netplan on Ubuntu 18.04 Server" /><published>2019-08-25T00:00:00-04:00</published><updated>2019-08-25T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server</id><content type="html" xml:base="http://localhost:4000/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server">&lt;p&gt;I’ve only just begun using Ubuntu 18.04 server and one of the very first things I noticed was that network configuration is now done using netplan. I’m so used to doing the following:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nano /etc/network/interfaces
+auto ens3
+iface ens3 inet static
+    address 192.168.122.100
+    netmask 255.255.255.0
+    gateway 192.168.122.1
+    dns-nameservers 8.8.8.8
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;systemctl restart networking&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;To my surprise a message in /etc/network/interfaces says that ifupdown has been replaced by netplan. It turns out that although it’s a new way of configuring network settings, it isn’t all that hard.&lt;/p&gt;
+
+&lt;p&gt;First, issue these commands:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;rm /etc/netplan/50-cloud-init.yaml
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nano /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+&lt;span class=&quot;c&quot;&gt;#Add this line:&lt;/span&gt;
+network: &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;config: disabled&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;All the above commands do are disable cloud-init’s network configuration capabilities. If you reboot with the above configuration, you will have no network. To set a static IP address, create a new YAML file with the following:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nano /etc/netplan/ens3.yaml
+&lt;span class=&quot;c&quot;&gt;# Indents must be spaces when using YAML, not tabs.&lt;/span&gt;
+network:
+    version: 2
+    ethernets:
+        ens3:
+            dhcp4: no
+            addresses: &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;192.168.122.100/24]
+            gateway4: 192.168.122.1
+            nameservers:
+                addresses: &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;8.8.8.8]&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now check the settings are ok in this file:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;netplan try&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If everything is ok you have the option to immediately apply the settings by pressing Enter.&lt;/p&gt;
+
+&lt;p&gt;If you want to use a dynamic IP address instead, all you need to change in the above configuration is dhcp4: yes, then remove everything below it:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nano /etc/netplan/ens3.yaml
+&lt;span class=&quot;c&quot;&gt;# Indents must be spaces when using YAML, not tabs.&lt;/span&gt;
+network:
+    version: 2
+    ethernets:
+        ens3:
+            dhcp4: no            &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Again, check the settings are ok, then press Enter.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;netplan try&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://netplan.io/examples&quot;&gt;Netplan Examples&lt;/a&gt;&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">This post will show you how to configure a static IP address with netplan on Ubuntu 18.04 Server</summary></entry><entry><title type="html">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server</title><link href="http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" rel="alternate" type="text/html" title="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server" /><published>2019-08-24T00:00:00-04:00</published><updated>2019-08-24T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server</id><content type="html" xml:base="http://localhost:4000/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server">&lt;p&gt;This post will outline how to install an Active Directory(AD) Domain Controller on Ubuntu Server 18.04. Yes, that’s right…Active Directory on a linux host. Not a backup domain controller but a functional AD that you can create users with, join computers to, and set up group policy.&lt;/p&gt;
 
 &lt;h2 id=&quot;network-configuration&quot;&gt;Network configuration&lt;/h2&gt;
 
@@ -853,92 +1118,4 @@ XITOS  :677028615:8VSB:97:100:6&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=KI0LuIcFM98&quot;&gt;CWNE88 Youtube - Raspberry Pi Multicast TV server&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.linuxtv.org/wiki/index.php/Hauppauge_WinTV-dualHD&quot;&gt;Linux TV - Hauppauge WinTV dual HD&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://github.com/gfto/dvblast/blob/master/README&quot;&gt;DVBlast Config File&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to stream free to air television over an IP network</summary></entry><entry><title type="html">Migrating a UniFi access point to a new controller</title><link href="http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller" rel="alternate" type="text/html" title="Migrating a UniFi access point to a new controller" /><published>2018-05-13T00:00:00-04:00</published><updated>2018-05-13T00:00:00-04:00</updated><id>http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller</id><content type="html" xml:base="http://localhost:4000/posts/2018/Migrating-a-UniFi-access-point-to-a-new-controller">&lt;p&gt;If you have an access point that is already tied to an existing UniFi controller, you can migrate it to a new one without having to physically touch the device.&lt;/p&gt;
-
-&lt;p&gt;I needed to do this in the past to move a bunch of access points from a failing &lt;a href=&quot;https://www.ubnt.com/unifi/unifi-cloud-key/&quot;&gt;Cloud Key&lt;/a&gt;, and onto a new controller running on a virtual machine.&lt;/p&gt;
-
-&lt;p&gt;You will need the following:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;IP address of the access point.&lt;/li&gt;
-  &lt;li&gt;Superadmin login of the previous controller.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;SSH to the access point. Here you will need to use the superadmin login of the previous controller. Next, note down the MAC address by doing an ifconfig. Then finally, reset the access point to its factory defaults.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh ip-or-hostname-of-access-point
-~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ifconfig
-~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;syswrapper.sh restore-default&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;The access point can take about a minute to reset. Ping it until you receive a reply, so you know when it is ready to be adopted by the new controller.&lt;/p&gt;
-
-&lt;p&gt;Now tell the access point to talk to the new controller by invoking the set-inform command.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh ip-or-hostname-of-access-point
-~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;set-inform http://ip-address-or-hostname-of-new-controller:8080/inform&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Open a browser and go to &lt;em&gt;http://ip-address-or-hostname-of-new-controller:8080&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Login, go to Devices, then click Adopt on the access point.&lt;/p&gt;
-
-&lt;p&gt;The access point will now be managed by the new controller.&lt;/p&gt;
-
-&lt;h2 id=&quot;notes&quot;&gt;Notes&lt;/h2&gt;
-
-&lt;p&gt;The last time I did this, the access points did not adopt straight away. They would go through the process of adopting, then after five minutes, the status would still say adopting. In this case I had to run the set-inform command again on the access point, then I had the option to adopt again on the controller. The second time around seemed to work.&lt;/p&gt;
-
-&lt;p&gt;You can view the logs on the access point with the following commands:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;tail /var/log/messages
-OR
-~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;less /var/log/messages&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;If you do not have a static IP reservation in DHCP, then the &lt;a href=&quot;https://chrome.google.com/webstore/detail/ubiquiti-device-discovery/hmpigflbjeapnknladcfphgkemopofig?hl=en&quot;&gt;Ubiquiti Device Discover Tool&lt;/a&gt; for Chrome is quite useful for finding the device. You must be on the same LAN as the access point to use this. Run a scan and find the IP address that corresponds to the MAC address from the ifconfig before. You can even use this tool to run the set-inform.&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to migrate an existing access point to a new UniFi controller.</summary></entry><entry><title type="html">ScreenCloud Player on a Raspberry Pi</title><link href="http://localhost:4000/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi" rel="alternate" type="text/html" title="ScreenCloud Player on a Raspberry Pi" /><published>2018-05-12T00:00:00-04:00</published><updated>2018-05-12T00:00:00-04:00</updated><id>http://localhost:4000/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi</id><content type="html" xml:base="http://localhost:4000/posts/2018/ScreenCloud-Player-on-a-Raspberry-Pi">&lt;p&gt;&lt;a href=&quot;https://screen.cloud&quot;&gt;ScreenCloud&lt;/a&gt; is a digital signage solution that is very user friendly. It is simple to configure, and compatible with variety of TV’s and devices.&lt;/p&gt;
-
-&lt;p&gt;This guide will go through the process of installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.&lt;/p&gt;
-
-&lt;h2 id=&quot;configuration&quot;&gt;Configuration&lt;/h2&gt;
-
-&lt;p&gt;On a newly installed Raspbian system, download and install all updates, then reboot.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt update &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
-~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt upgrade &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
-~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;reboot&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Open Chromium and install the &lt;a href=&quot;https://chrome.google.com/webstore/detail/screencloud-digital-signa/efdahhfldoeikfglgolhibmdidbnpneo?hl=en&quot;&gt;ScreenCloud Digital Signage Player&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/images/posts/2018/sc-add-to-chrome.png&quot; alt=&quot;Add to Chrome&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Note the app-id in the URL is efdahhfldoeikfglgolhibmdidbnpneo. We will need this later when configuring the application to automatically start on boot.&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;The application will automatically open once it is added to Chromium. Exit full screen by pressing escape on the keyboard and close the application.&lt;/p&gt;
-
-&lt;p&gt;Configure Chromium to automatically start the ScreenCloud Player by editing the autostart file. Also, now is a good time to disable the screensaver.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;nano /home/pi/.config/lxsession/LXDE-pi/autostart
-
-&lt;span class=&quot;c&quot;&gt;# Add this line:&lt;/span&gt;
-@chromium &lt;span class=&quot;nt&quot;&gt;--app-id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;efdahhfldoeikfglgolhibmdidbnpneo &lt;span class=&quot;nt&quot;&gt;--disable-session-crashed-bubble&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;# Comment out this line&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#@xscreensaver -no-splash&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Reboot the system. The pi will automatically login and start the ScreenCloud Player.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;reboot&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h2 id=&quot;notes&quot;&gt;Notes&lt;/h2&gt;
-
-&lt;p&gt;The default username and password is pi/raspberry, which is assumed to be in use for this guide.&lt;/p&gt;
-
-&lt;p&gt;If you need to install Chromium, run the following command:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt install chromium &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
-OR
-~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt install chromium-browser &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;If the pi is not set to automatically login do the following:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;raspi-config
-3 Boot Options &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; B1 Desktop / CLI &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; B4 Desktop Autologin&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.</summary></entry></feed>
+&lt;/ol&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to stream free to air television over an IP network</summary></entry></feed>

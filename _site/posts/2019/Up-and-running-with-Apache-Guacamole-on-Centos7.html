@@ -1,0 +1,700 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.16.6 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Up and running with Apache Guacamole on CentOS 7 - Rico Sharp</title>
+<meta name="description" content="How to setup a clientless remote access gateway using CentOS 7 and Apache Guacamole with AD authentication, Windows RDP, and Remote Apps">
+
+
+  <meta name="author" content="Rico Sharp">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Rico Sharp">
+<meta property="og:title" content="Up and running with Apache Guacamole on CentOS 7">
+<meta property="og:url" content="http://localhost:4000/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7">
+
+
+  <meta property="og:description" content="How to setup a clientless remote access gateway using CentOS 7 and Apache Guacamole with AD authentication, Windows RDP, and Remote Apps">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2019-09-02T00:00:00-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Rico Sharp Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE ]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Rico Sharp
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about" >About</a>
+            </li><li class="masthead__menu-item">
+              <a href="http://resume.ricosharp.com" >Resume</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Rico Sharp" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Rico Sharp</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Washington, D.C.</span>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:rico.sharp@gmail.com">
+            <meta itemprop="email" content="rico.sharp@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/ricosharp" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Up and running with Apache Guacamole on CentOS 7">
+    <meta itemprop="description" content="How to setup a clientless remote access gateway using CentOS 7 and Apache Guacamole with AD authentication, Windows RDP, and Remote Apps">
+    <meta itemprop="datePublished" content="September 02, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Up and running with Apache Guacamole on CentOS 7
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  6 minute read
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Apache Guacamole is an open source, clientless remote access gateway. It can be used to establish remote sessions over various protocols through a web browser. Below I will set up Apache Guacamole with authentication against Active Directory (AD) through Lightweight Directory Access Protocol (LDAP).</p>
+
+<p>After this I will configure a Windows 10 Pro machine in two ways; Remote Desktop Protocol (RDP) and RemoteApp. The difference between the two is RDP offers a full desktop whereas RemoteApp will present a single application.</p>
+
+<p>In this article I will continue to use the AD environment from my <a href="https://blog.ricosharp.com/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
+</a> post.</p>
+
+<p>The Apache Guacamole machine I will be using is a minimal installation of Centos 7 with an IP address of 192.168.122.75 and hostname of guacamole.</p>
+
+<h2 id="add-dns-entry-for-guacamole-machine">Add DNS entry for Guacamole machine</h2>
+<p>On DC1, the domain controller, add a DNS record for the Apache Guacamole machine.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>samba-tool dns add 192.168.122.70 ad.ricosharp.com guacamole A 192.168.122.75</code></pre></figure>
+
+<p><em>Make sure your Unix user has an account in AD so you can authenticate. The account I am using has been added as a Domain Administrator</em></p>
+
+<p>If you skip this step, you can just access the Guacamole machine through its IP address.</p>
+
+<h2 id="trusted-certificates-for-ldap">Trusted Certificates for LDAP</h2>
+
+<p>You will need the public certificate of your domain controller (DC1) since we will be using LDAPS. Samba creates a self signed certificate when provisioning a domain controller in /var/lib/samba/private/tls called ca.pem. This will need to be copied to the CentOS 7 server. Here I also add it as a trusted certificate on the guacamole machine and test that it works.</p>
+
+<p><strong>DC1</strong></p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>scp /var/lib/samba/private/tls/ca.pem root@guacamole.ad.ricosharp.com:/etc/pki/ca-trust/source/anchors/ca.pem</code></pre></figure>
+
+<p><strong>GUACAMOLE</strong></p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# update-ca-trust extract
+~]# openssl s_client <span class="nt">-connect</span> dc1.ad.ricosharp.com:636</code></pre></figure>
+
+<p>The result will say ok. If you get a message saying unable to verify then the certificate has not been added properly.</p>
+
+<p>Next you will need to create an LDAP bind user in AD. I just create a standard user called ldapbind through Active Directory Users and Computers.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/ad-ldap-bind-user.png" alt="AD LDAP Bind User" /></p>
+
+<p><strong>GUACAMOLE</strong></p>
+
+<p>Now, test that you can actually connect to AD with LDAPS. You will be prompted for the ldapbind user’s password and</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install openldap-clients <span class="nt">-y</span>
+~]# ldapsearch <span class="nt">-H</span> ldaps://dc1.ad.ricosharp.com:636 <span class="nt">-D</span> <span class="nv">CN</span><span class="o">=</span>ldapbind,CN<span class="o">=</span>Users,DC<span class="o">=</span>ad,DC<span class="o">=</span>ricosharp,DC<span class="o">=</span>com <span class="nt">-W</span> <span class="nt">-b</span> <span class="nv">DC</span><span class="o">=</span>ad,DC<span class="o">=</span>ricosharp,DC<span class="o">=</span>com</code></pre></figure>
+
+<p>If sucessful, the query will return some AD information. You should The machine is now ready to have Apache Guacamole installed.</p>
+
+<h2 id="guacamole-installation">Guacamole Installation</h2>
+<p>The easiest way to get up and running is to use a script, like this one <a href="https://github.com/Zer0CoolX/guacamole-install-rhel/blob/master/guac-install.sh">here</a> by <a href="https://github.com/Zer0CoolX">Zer0CoolX</a>.</p>
+
+<p>Download the script, give it execute permissions, and run it.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install wget <span class="nt">-y</span>
+~]# wget https://raw.githubusercontent.com/Zer0CoolX/guacamole-install-rhel/master/guac-install.sh
+~]# chmod +x guac-install.sh
+~]# ./guac-install.sh</code></pre></figure>
+
+<p>Follow the prompts to install. Below are the main settings to specify:</p>
+
+<ul>
+  <li>Self-signed certificate</li>
+  <li>Hostname - guacamole</li>
+  <li>LDAP(S)</li>
+  <li>yes to LDAPS</li>
+  <li>Certificate filename: ca.pem</li>
+  <li>Certificate path: /etc/pki/ca-trust/source/anchors/</li>
+  <li>LDAP Server Hostname: ad.ricosharp.com</li>
+  <li>LDAP User Base DN: DC=ad,DC=ricosharp,DC=com</li>
+  <li>LDAP Search Bind DN: CN=ldapbind,CN=Users,DC=ad,DC=ricosharp,DC=com</li>
+  <li>No 2FA</li>
+</ul>
+
+<p>Select option 8 to begin installation. The script recommends a reboot once installation completes.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# reboot</code></pre></figure>
+
+<p>After rebooting, you can access the web front end through either the hostname or IP address in a web browser.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/guacamole-ui.png" alt="Guacamole UI" /></p>
+
+<p>The default administrator username/password is guacadmin/guacadmin.</p>
+
+<h2 id="linking-ad-accounts">Linking AD Accounts</h2>
+
+<p>The default guacadmin user can only access users stored in the local database. You need to add an AD user in order view and grant AD accounts access to remote sessions.</p>
+
+<ol>
+  <li>Log in to web interface using the default username/password</li>
+  <li>Click guacadmin at the top right hand corner of the page and select Settings</li>
+  <li>Click the Users tab</li>
+  <li>Select New User</li>
+  <li>Enter an AD username/password. This can be a standard user account in AD</li>
+  <li>Check all the permissions options to make this user an administrator</li>
+</ol>
+
+<p>Log out and log back in under the AD account. You will now be able to see AD accounts under Settings &gt; Users.</p>
+
+<h2 id="windows-10-remote-desktop-protocol">Windows 10 Remote Desktop Protocol</h2>
+
+<p>The Windows 10 Pro machine I am using is connected to AD with an IP address of 192.168.122.90 obtained through DHCP.</p>
+
+<p><strong>Windows 10 Machine</strong></p>
+
+<p>First, configure the Window 10 computer to allow RDP.</p>
+<ol>
+  <li>Open File Explorer</li>
+  <li>Right click This PC &gt; Properties</li>
+  <li>Click Remote Settings</li>
+  <li>Click Allow remote connections to this computer and click Select Users</li>
+  <li>Add Domain Users to this list
+<img src="http://localhost:4000/assets/images/posts/2019/rdp-setup.png" alt="RDP Setup" /></li>
+</ol>
+
+<p><strong>Guacamole UI</strong></p>
+
+<p>Next we need to add the machine to guacamole. Log into the guacamole UI and the administrator account that has access to AD users.</p>
+
+<ol>
+  <li>Click the username at the top right corner of the page &gt; Settings</li>
+  <li>Click the Connections tab</li>
+  <li>Click New Connection</li>
+  <li>Give the connection a name and select RDP as the protocol</li>
+  <li>In the Network section under Parameters, enter either the hostname or IP and RDP port (default 3389)</li>
+  <li>Under Authentication use ${GUAC_USERNAME} as the username and ${GUAC_PASSWORD} as the password.</li>
+  <li>Enter the domain name and security mode</li>
+  <li>Select Ignore server certificate</li>
+  <li>Scroll to the bottom of the page and click Save</li>
+</ol>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/rdp-parameters.png" alt="RDP Parameters" /></p>
+
+<p>A couple of points to make about the configuration above. Step 6 takes the credentials of the current logged  in user (${GUAC_USERNAME} and ${GUAC_PASSWORD})and passes it through to the Windows 10 RDP session for log in. So if johndoe logs into the guacamole UI and can see the Windows 10 machine advertised, it will log into that RDP session with his johndoe AD credentials.</p>
+
+<p>At step 8 we selected to ignore server certificates, as I do not have certificates set up. When connecting to an RDP session using the Windows RDP client, you will be prompted with a message saying the certificate is not trusted. Apache Guacamole does not do this and will fail to connect instead. Checking Ignore server certificate bypasses this.</p>
+
+<p><strong>Advertise RDP Connection</strong></p>
+
+<p>Now you need to actually advertise this connection to the users who should have access. To keep this simple, I’m going to advertise to a single user. Using the AD Administrator account within the guacamole UI, do the following.</p>
+
+<ol>
+  <li>Click the username at the top right corner of the page &gt; Settings</li>
+  <li>Click the Users tab</li>
+  <li>Select the User who you want to advertise the RDP session to</li>
+  <li>Under Connections, click All Connections and check the box of the RDP session that was created</li>
+  <li>Click Save</li>
+</ol>
+
+<p>You can now log out and log back in as this user and an RDP session will start automatically.</p>
+
+<p><em>Note that on a standard Windows computer, RDP is only limited to one logged in user at a time.</em></p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/guac-rdp-session.png" alt="Guacamole RDP Session" /></p>
+
+<h2 id="remoteapps">RemoteApps</h2>
+<p>RemoteApps is a great way of running a single application through an RDP session. The application is the only window that will show. There will be no start menu or desktop, just the application.</p>
+
+<p>In order to use RemoteApps under Windows 10 Pro, you need to make a slight change in the registry. On the machine that the RemoteApp will be running:</p>
+
+<ol>
+  <li>Open the registry through Start &gt; Run &gt; regedit</li>
+  <li>Navigate to HKEY_LOCAL_MACHINE\SOFTWARE\Microsot\Windows NT\CurrentVersion\Terminal Server\TSAppAllowList</li>
+  <li>Select fDisabledAllowList and change the value from 0 to 1</li>
+</ol>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/remoteapp-registry.png" alt="RemoteApp Registry" /></p>
+
+<p>Now advertise the RemoteApp as a new connection in guacamole. Here I will be advertising notepad using the same Windows 10 machine above:</p>
+
+<ol>
+  <li>Log in as the AD Administrator account within the guacamole UI</li>
+  <li>Click the username at the top right corner of the page &gt; Settings</li>
+  <li>Select the Connection tab and choose New Connection</li>
+  <li>Give the connection a name and make sure you select RDP as the protocol</li>
+  <li>In the Network section under Parameters, enter either the hostname or IP and RDP port (default 3389)</li>
+  <li>Under Authentication use ${GUAC_USERNAME} as the username and ${GUAC_PASSWORD} as the password.</li>
+  <li>Enter the domain name and security mode</li>
+  <li>Select Ignore server certificate</li>
+  <li>In the RemoteApp section enter the path of notepad (C:\Windows\system32\notepad.exe) in the Program textbox</li>
+  <li>Scroll to the bottom of the page and click Save</li>
+</ol>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/rdp-remoteapp.png" alt="RDP RemoteApp" /></p>
+
+<p><strong>Advertise RemoteApp</strong></p>
+
+<p>As with the RDP session above, you need to advertise the RemoteApp RDP session</p>
+
+<ol>
+  <li>Log in as the AD Administrator account within the guacamole UI</li>
+  <li>Click the username at the top right corner of the page &gt; Settings</li>
+  <li>Click the Users tab</li>
+  <li>Select the User who you want to advertise the RemoteApp RDP session to</li>
+  <li>Under Connections, click All Connections and check the box of the RemoteApp RDP session just created</li>
+  <li>Click Save</li>
+</ol>
+
+<p>Now log in under the user the RemoteApp was advertised to and notepad will start automatically.</p>
+
+<p><img src="http://localhost:4000/assets/images/posts/2019/remoteapp-notepad.png" alt="RemoteApp Notepad" /></p>
+
+<h2 id="references">References</h2>
+<ul>
+  <li>
+    <p><a href="https://github.com/Zer0CoolX/guacamole-install-rhel">Apache Guacamole install script for RHEL 7/CentOS 7</a></p>
+  </li>
+  <li>
+    <p><a href="http://www.sbsfaq.com/the-following-remoteapp-program-is-not-in-the-list-of-authorized-programs-on-windows-essential-server/">The following RemoteApp program is not in the list of authorized programs on Windows Essential Server</a></p>
+  </li>
+  <li>
+    <p><a href="Guacamole Apache LDAP Assignment">https://serverfault.com/questions/965941/guacamole-apache-ldap-assignment</a></p>
+  </li>
+</ul>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-09-02T00:00:00-04:00">September 02, 2019</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server" class="pagination--pager" title="How to configure a static IP address with netplan on Ubuntu 18.04 Server
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/How-to-configure-a-static-ip-address-with-netplan-on-Ubuntu-18-04-Server" rel="permalink">How to configure a static IP address with netplan on Ubuntu 18.04 Server
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">This post will show you how to configure a static IP address with netplan on Ubuntu 18.04 Server
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" rel="permalink">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  6 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to build an Active Directory Domain Controller using Samba 4 on a linux host
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Windows-deployment-with-Linux-Automating-the-Install" rel="permalink">Windows 10 deployment with Linux - Automating the Install
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Windows-deployment-with-Linux-Initial-Setup" rel="permalink">Windows 10 deployment with Linux - Initial Setup
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  7 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2019 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
