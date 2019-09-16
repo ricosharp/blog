@@ -200,4 +200,7 @@ Now log in under the user the RemoteApp was advertised to and notepad will start
 
 - [The following RemoteApp program is not in the list of authorized programs on Windows Essential Server](http://www.sbsfaq.com/the-following-remoteapp-program-is-not-in-the-list-of-authorized-programs-on-windows-essential-server/)
 
-- [https://serverfault.com/questions/965941/guacamole-apache-ldap-assignment](Guacamole Apache LDAP Assignment)
+- [Guacamole Apache LDAP Assignment](https://serverfault.com/questions/965941/guacamole-apache-ldap-assignment)
+
+- [How to install a CA certificate on Red Hat Enterprise Linux 6 / 7](https://access.redhat.com/solutions/1519813)
+

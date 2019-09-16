@@ -63,4 +63,14 @@ var store = [{
         "excerpt":"Apache Guacamole is an open source, clientless remote access gateway. It can be used to establish remote sessions over various protocols through a web browser. Below I will set up Apache Guacamole with authentication against Active Directory (AD) through Lightweight Directory Access Protocol (LDAP). After this I will configure a...","categories": [],
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7",
+        "teaser":null},{
+        "title": "Converting ova to qcow2",
+        "excerpt":"There is no native way (that I know of anyway) to simply import an ova file directly into KVM. An ova file is basically an archive file that contains virtual machine information. We can extract the files from this archive and convert the vmdk disks into qcow2 format and import...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Converting-ova-file-to-qcow2",
+        "teaser":null},{
+        "title": "Raspberry Pi Network Configuration",
+        "excerpt":"Join a wifi network Configure settings to join a network: ~]$ sudo nano /etc/wpa_supplicant/wpa_supplicant.conf # Add these lines to the config file with the appropriate values: network={ ssid=\"Network_Name\" psk=\"Network_Password\" } Apply the settings: ~]$ wpa_cli -i wlan0 reconfigure Setting a static IP address ~]$ sudo nano /etc/dhcpcd.conf interface eth0 static...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration",
         "teaser":null}]

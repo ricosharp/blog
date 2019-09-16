@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Windows 10 deployment with Linux - Automating the Install - Rico Sharp</title>
-<meta name="description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
+<!-- begin _includes/seo.html --><title>Raspberry Pi Network Configuration - Rico Sharp</title>
+<meta name="description" content="How to configure various network settings on a Raspberry Pi">
 
 
   <meta name="author" content="Rico Sharp">
@@ -19,30 +19,30 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Rico Sharp">
-<meta property="og:title" content="Windows 10 deployment with Linux - Automating the Install">
-<meta property="og:url" content="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">
+<meta property="og:title" content="Raspberry Pi Network Configuration">
+<meta property="og:url" content="http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration">
 
 
-  <meta property="og:description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
-
-
-
-
-
-
-
-  <meta property="article:published_time" content="2019-05-18T00:00:00-04:00">
+  <meta property="og:description" content="How to configure various network settings on a Raspberry Pi">
 
 
 
 
 
-  
+
+
+  <meta property="article:published_time" content="2019-09-15T00:00:00-04:00">
+
+
+
+
 
   
 
+  
 
-<link rel="canonical" href="http://localhost:4000/posts/2019/Windows-deployment-with-Linux-Automating-the-Install">
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration">
 
 
 
@@ -268,15 +268,15 @@
 
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Windows 10 deployment with Linux - Automating the Install">
-    <meta itemprop="description" content="A continuation to deploying Windows 10 with MDT and Linux, with a focus on automating the process">
-    <meta itemprop="datePublished" content="May 18, 2019">
+    <meta itemprop="headline" content="Raspberry Pi Network Configuration">
+    <meta itemprop="description" content="How to configure various network settings on a Raspberry Pi">
+    <meta itemprop="datePublished" content="September 15, 2019">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">Windows 10 deployment with Linux - Automating the Install
+          <h1 id="page-title" class="page__title" itemprop="headline">Raspberry Pi Network Configuration
 </h1>
           
             <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
@@ -284,7 +284,7 @@
 
 
 
-  1 minute read
+  less than 1 minute read
 </p>
           
         </header>
@@ -292,63 +292,28 @@
 
       <section class="page__content" itemprop="text">
         
-        <p>My <a href="https://blog.ricosharp.com/posts/2019/Windows-deployment-with-Linux">previous post</a> about Windows 10 Deployment with Linux was focussed on how to get up and running. But the deployment process requires quite a bit of user interaction. For example, after network booting, you have to login to the deployment share. You then have to select the task sequence and set a bunch of other parameters. All of these steps can be automated to the point where there is zero user interaction.</p>
+        <h2 id="join-a-wifi-network">Join a wifi network</h2>
+<p>Configure settings to join a network:</p>
 
-<p>In order to achieve a fully automated installation, you need to set some parameters in the CustomSettings.ini and Bootstrap.ini files. What these parameters do should be self evident in the configuration below.</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/wpa_supplicant/wpa_supplicant.conf
+<span class="c"># Add these lines to the config file with the appropriate values:</span>
+<span class="nv">network</span><span class="o">={</span>
+    <span class="nv">ssid</span><span class="o">=</span><span class="s2">"Network_Name"</span>
+    <span class="nv">psk</span><span class="o">=</span><span class="s2">"Network_Password"</span>
+<span class="o">}</span></code></pre></figure>
 
-<p>My personal preference is not to fully automate a deployment. This gives you a way out if you accidentally network boot into the Windows PE environment, which would then automatically begin the Task Sequence. What I prefer to do force a page from the wizard to show, such as the Task Sequence selection (SkipTaskSequence=NO).</p>
+<p>Apply the settings:</p>
 
-<h2 id="customsettingsini">CustomSettings.ini</h2>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>wpa_cli <span class="nt">-i</span> wlan0 reconfigure</code></pre></figure>
 
-<p>There are two ways to edit this file:</p>
+<h2 id="setting-a-static-ip-address">Setting a static IP address</h2>
 
-<ol>
-  <li>Open \\%DeployRoot%\Control\CustomSettings.ini with a text editor such as notepad.</li>
-  <li>In the Deployment Workbench, right click your Deployment Share then select properties. The CustomSettings.ini file can be edited from the Rules tab.</li>
-</ol>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/dhcpcd.conf
+interface eth0
+static <span class="nv">ip_address</span><span class="o">=</span>192.168.1.100/24
+static <span class="nv">routers</span><span class="o">=</span>192.168.0.1
+static <span class="nv">domain_name_servers</span><span class="o">=</span>192.168.1.1</code></pre></figure>
 
-<figure class="highlight"><pre><code class="language-text" data-lang="text">[Settings]
-Priority=Default
-Properties=MyCustomProperty
-
-[Default]
-OSInstall=Y
-SkipCapture=YES
-SkipAdminPassword=YES
-SkipProductKey=YES
-SkipComputerBackup=YES
-SkipBitLocker=YES
-SkipTaskSequence=YES
-TaskSequenceID="Windows 10 Deployment"
-SkipComputerName=YES
-SkipDomainMembership=YES
-SkipUserData=YES
-SkipLocaleSelection=YES
-TimeZoneName="Eastern Standard Time"
-SkipTimeZone=YES
-SkipSummary=YES</code></pre></figure>
-
-<h2 id="booststrapini">Booststrap.ini</h2>
-
-<p>There are two ways to edit this file:</p>
-
-<ol>
-  <li>Open \\%DeployRoot%\Control\Bootstrap.ini with a text editor such as notepad.</li>
-  <li>In the Deployment Workbench, right click your Deployment Share then select properties. Select the Rules tab then click Edit Bootstrap.ini.</li>
-</ol>
-
-<figure class="highlight"><pre><code class="language-text" data-lang="text">[Settings]
-Priority=Default
-
-[Default]
-DeployRoot=\\192.168.122.100\mdt$
-UserID=mdtread
-UserPassword=password
-UserDomain=192.168.122.100
-SkipBDDWelcome=YES</code></pre></figure>
-
-<h2 id="references">References</h2>
-<p><a href="https://docs.microsoft.com/en-us/sccm/mdt/toolkit-reference">Toolkit Reference for the Microsoft Deployment Toolkit</a></p>
 
         
       </section>
@@ -359,7 +324,7 @@ SkipBDDWelcome=YES</code></pre></figure>
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-18T00:00:00-04:00">May 18, 2019</time></p>
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-09-15T00:00:00-04:00">September 15, 2019</time></p>
         
       </footer>
 
@@ -368,12 +333,11 @@ SkipBDDWelcome=YES</code></pre></figure>
       
   <nav class="pagination">
     
-      <a href="/posts/2019/Windows-deployment-with-Linux-Initial-Setup" class="pagination--pager" title="Windows 10 deployment with Linux - Initial Setup
+      <a href="/posts/2019/Converting-ova-file-to-qcow2" class="pagination--pager" title="Converting ova to qcow2
 ">Previous</a>
     
     
-      <a href="/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" class="pagination--pager" title="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
-">Next</a>
+      <a href="#" class="pagination--pager disabled">Next</a>
     
   </nav>
 
@@ -387,34 +351,6 @@ SkipBDDWelcome=YES</code></pre></figure>
     <div class="page__related">
       <h4 class="page__related-title">You May Also Enjoy</h4>
       <div class="grid__wrapper">
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/posts/2019/Raspberry-Pi-Network-Configuration" rel="permalink">Raspberry Pi Network Configuration
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  less than 1 minute read
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">How to configure various network settings on a Raspberry Pi
-</p>
-  </article>
-</div>
-
         
           
 
@@ -495,6 +431,34 @@ SkipBDDWelcome=YES</code></pre></figure>
 </p>
     
     <p class="archive__item-excerpt" itemprop="description">This post will show you how to configure a static IP address with netplan on Ubuntu 18.04 Server
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Samba-4-Active-Directory-Domain-Controller-on-Ubuntu-18-04-Server" rel="permalink">Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  6 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to build an Active Directory Domain Controller using Samba 4 on a linux host
 </p>
   </article>
 </div>
