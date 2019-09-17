@@ -1,4 +1,73 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-09-15T21:01:58-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Raspberry Pi Network Configuration</title><link href="http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration" rel="alternate" type="text/html" title="Raspberry Pi Network Configuration" /><published>2019-09-15T00:00:00-04:00</published><updated>2019-09-15T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration</id><content type="html" xml:base="http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration">&lt;h2 id=&quot;join-a-wifi-network&quot;&gt;Join a wifi network&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-09-16T21:55:01-04:00</updated><id>http://localhost:4000/</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Headless KVM Host with CentOS and virt-manager</title><link href="http://localhost:4000/posts/2019/Headless-KVM-Host-with-CentOS-and-virt-manager" rel="alternate" type="text/html" title="Headless KVM Host with CentOS and virt-manager" /><published>2019-09-16T00:00:00-04:00</published><updated>2019-09-16T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Headless-KVM-Host-with-CentOS-and-virt-manager</id><content type="html" xml:base="http://localhost:4000/posts/2019/Headless-KVM-Host-with-CentOS-and-virt-manager">&lt;p&gt;I’m currently running &lt;a href=&quot;https://www.linux-kvm.org/page/Main_Page&quot;&gt;KVM&lt;/a&gt; on a single remote host. I have a bunch of virtual machines running services like DHCP/DNS, UniFi Controller and UniFi video.&lt;/p&gt;
+
+&lt;p&gt;When I intially set this up I wanted to keep the virtual host installation as minimal as possible. So off I went and did a minimal installation of CentOS 7, thinking I could remotely manage this server through File &amp;gt; Add Connection on my local Linux machine with virt-manager. Of course this was not as straightforward as I thought, so during my search for an answer I came across a suggestion to use SSH with X forwarding.&lt;/p&gt;
+
+&lt;p&gt;Below is a guide on setting up a KVM host with virt-manager that can be remotely managed through SSH with X forwarding.&lt;/p&gt;
+
+&lt;p&gt;I’m going to be using a CentOS 7 minimal installation that is fully patched.&lt;/p&gt;
+
+&lt;p&gt;To begin, install the virtualization host software.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum group install &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Virtualization Host&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Start the libvirtd service and verify it is enabled on startup.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# systemctl start libvirtd
+~]# systemctl is-enabled libvirtd&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Install X Window System.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum install &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;@X Window System&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Install virt-manager.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# yum install &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt; virt-manager&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The host setup is now complete. Now all we need to do is connect to the host through SSH with X Forwarding.&lt;/p&gt;
+
+&lt;h2 id=&quot;connecting-with-linux&quot;&gt;Connecting with Linux&lt;/h2&gt;
+&lt;p&gt;Open a terminal and SSH to the KVM host. Once connected open virt-manager.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh &lt;span class=&quot;nt&quot;&gt;-X&lt;/span&gt; rico@192.168.122.100
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;su
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;virt-manager&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;connecting-with-a-mac&quot;&gt;Connecting with a Mac.&lt;/h2&gt;
+&lt;p&gt;Download and install &lt;a href=&quot;https://www.xquartz.org/&quot;&gt;XQuartz&lt;/a&gt;
+Open a terminal and SSH to the KVM host. Once connected open virt-manager.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh &lt;span class=&quot;nt&quot;&gt;-X&lt;/span&gt; rico@192.168.122.100
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;su
+~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;virt-manager&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;connecting-with-a-windows-system&quot;&gt;Connecting with a Windows System&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Download, install, then open &lt;a href=&quot;https://sourceforge.net/projects/xming/&quot;&gt;xming&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Download and open putty&lt;/li&gt;
+  &lt;li&gt;Go to Connection &amp;gt; SSH &amp;gt; X11 and check Enable X11 forwarding&lt;/li&gt;
+  &lt;li&gt;Go back to Session and enter the IP/Hostname of your machine and click Open&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;using-virt-manager-as-a-non-root-user&quot;&gt;Using virt-manager as a non-root user&lt;/h2&gt;
+
+&lt;p&gt;In the SSH examples above, I am SSH’ing as a non-root user, then changing to root to run virt-manager. This is because polkit blocks user accounts from accessing libvirtd.&lt;/p&gt;
+
+&lt;p&gt;To work around this and allow non-root users who are part of the wheel group access to run virt-manager, create this rule:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]# vi /etc/polkit-1/rules.d/51-libvirt.rules
+
+/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; Allow users &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;wheel group to manage the libvirt
+daemon without authentication &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;/
+polkit.addRule&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;action, subject&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;action.id &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;org.libvirt.unix.manage&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+        subject.isInGroup&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;wheel&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return &lt;/span&gt;polkit.Result.YES&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;})&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://wiki.archlinux.org/index.php/Libvirt#Using_polkit&quot;&gt;https://wiki.archlinux.org/index.php/Libvirt#Using_polkit&lt;/a&gt;&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">Installing and managing a KVM virtualization host remotely with virt-manager</summary></entry><entry><title type="html">Raspberry Pi Network Configuration</title><link href="http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration" rel="alternate" type="text/html" title="Raspberry Pi Network Configuration" /><published>2019-09-15T00:00:00-04:00</published><updated>2019-09-15T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration</id><content type="html" xml:base="http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration">&lt;h2 id=&quot;join-a-wifi-network&quot;&gt;Join a wifi network&lt;/h2&gt;
 &lt;p&gt;Configure settings to join a network:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;~]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nano /etc/wpa_supplicant/wpa_supplicant.conf
@@ -975,6 +1044,4 @@ write memory&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>Rico
 
 &lt;p&gt;This script is intended to be run under Fedora 30. It isn’t my current desktop environment as I have had a lot of issues with GNS3 under it. But I thought I would update it anyway.&lt;/p&gt;
 
-&lt;script src=&quot;https://gist.github.com/ricosharp/7d4ce9e70f7b3d614ba2a7f54b9edb29.js&quot;&gt;&lt;/script&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A script I use to customize my Fedora 30 environment</summary></entry><entry><title type="html">Ubuntu 18.04 Customization</title><link href="http://localhost:4000/posts/2019/Ubuntu-18-04-Customization" rel="alternate" type="text/html" title="Ubuntu 18.04 Customization" /><published>2019-05-11T00:00:00-04:00</published><updated>2019-05-11T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Ubuntu-18-04-Customization</id><content type="html" xml:base="http://localhost:4000/posts/2019/Ubuntu-18-04-Customization">&lt;p&gt;Below is a script that I run after installing Ubuntu. It installs a couple of extra packages that I need and pins my favourite programs to the dash.&lt;/p&gt;
-
-&lt;script src=&quot;https://gist.github.com/ricosharp/35fbf54c13e4d7614b1e4601998257a3.js&quot;&gt;&lt;/script&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A script I use to customize my Ubuntu 18.04 environment</summary></entry></feed>
+&lt;script src=&quot;https://gist.github.com/ricosharp/7d4ce9e70f7b3d614ba2a7f54b9edb29.js&quot;&gt;&lt;/script&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A script I use to customize my Fedora 30 environment</summary></entry></feed>

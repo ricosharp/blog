@@ -73,4 +73,9 @@ var store = [{
         "excerpt":"Join a wifi network Configure settings to join a network: ~]$ sudo nano /etc/wpa_supplicant/wpa_supplicant.conf # Add these lines to the config file with the appropriate values: network={ ssid=\"Network_Name\" psk=\"Network_Password\" } Apply the settings: ~]$ wpa_cli -i wlan0 reconfigure Setting a static IP address ~]$ sudo nano /etc/dhcpcd.conf interface eth0 static...","categories": [],
         "tags": [],
         "url": "http://localhost:4000/posts/2019/Raspberry-Pi-Network-Configuration",
+        "teaser":null},{
+        "title": "Headless KVM Host with CentOS and virt-manager",
+        "excerpt":"I’m currently running KVM on a single remote host. I have a bunch of virtual machines running services like DHCP/DNS, UniFi Controller and UniFi video. When I intially set this up I wanted to keep the virtual host installation as minimal as possible. So off I went and did a...","categories": [],
+        "tags": [],
+        "url": "http://localhost:4000/posts/2019/Headless-KVM-Host-with-CentOS-and-virt-manager",
         "teaser":null}]

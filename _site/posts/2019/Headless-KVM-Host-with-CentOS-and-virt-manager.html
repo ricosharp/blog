@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Converting ova to qcow2 - Rico Sharp</title>
-<meta name="description" content="How to convert an ova file to qcow2 for use with a KVM hypervisor">
+<!-- begin _includes/seo.html --><title>Headless KVM Host with CentOS and virt-manager - Rico Sharp</title>
+<meta name="description" content="Installing and managing a KVM virtualization host remotely with virt-manager">
 
 
   <meta name="author" content="Rico Sharp">
@@ -19,30 +19,30 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Rico Sharp">
-<meta property="og:title" content="Converting ova to qcow2">
-<meta property="og:url" content="http://localhost:4000/posts/2019/Converting-ova-file-to-qcow2">
+<meta property="og:title" content="Headless KVM Host with CentOS and virt-manager">
+<meta property="og:url" content="http://localhost:4000/posts/2019/Headless-KVM-Host-with-CentOS-and-virt-manager">
 
 
-  <meta property="og:description" content="How to convert an ova file to qcow2 for use with a KVM hypervisor">
-
-
-
-
-
-
-
-  <meta property="article:published_time" content="2019-09-03T00:00:00-04:00">
+  <meta property="og:description" content="Installing and managing a KVM virtualization host remotely with virt-manager">
 
 
 
 
 
-  
+
+
+  <meta property="article:published_time" content="2019-09-16T00:00:00-04:00">
+
+
+
+
 
   
 
+  
 
-<link rel="canonical" href="http://localhost:4000/posts/2019/Converting-ova-file-to-qcow2">
+
+<link rel="canonical" href="http://localhost:4000/posts/2019/Headless-KVM-Host-with-CentOS-and-virt-manager">
 
 
 
@@ -268,15 +268,15 @@
 
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Converting ova to qcow2">
-    <meta itemprop="description" content="How to convert an ova file to qcow2 for use with a KVM hypervisor">
-    <meta itemprop="datePublished" content="September 03, 2019">
+    <meta itemprop="headline" content="Headless KVM Host with CentOS and virt-manager">
+    <meta itemprop="description" content="Installing and managing a KVM virtualization host remotely with virt-manager">
+    <meta itemprop="datePublished" content="September 16, 2019">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          <h1 id="page-title" class="page__title" itemprop="headline">Converting ova to qcow2
+          <h1 id="page-title" class="page__title" itemprop="headline">Headless KVM Host with CentOS and virt-manager
 </h1>
           
             <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
@@ -292,41 +292,77 @@
 
       <section class="page__content" itemprop="text">
         
-        <p>There is no native way (that I know of anyway) to simply import an ova file directly into KVM. An ova file is basically an archive file that contains virtual machine information. We can extract the files from this archive and convert the vmdk disks into qcow2 format and import into KVM.</p>
+        <p>I’m currently running <a href="https://www.linux-kvm.org/page/Main_Page">KVM</a> on a single remote host. I have a bunch of virtual machines running services like DHCP/DNS, UniFi Controller and UniFi video.</p>
 
-<p>In this example I’m using the librenms virtual machine that can be downloaded <a href="https://www.librenms.org/">here</a>. LibreNMS is an open source network monitoring system and is worth checking out.</p>
+<p>When I intially set this up I wanted to keep the virtual host installation as minimal as possible. So off I went and did a minimal installation of CentOS 7, thinking I could remotely manage this server through File &gt; Add Connection on my local Linux machine with virt-manager. Of course this was not as straightforward as I thought, so during my search for an answer I came across a suggestion to use SSH with X forwarding.</p>
 
-<p>First extract the files from the ova file.</p>
+<p>Below is a guide on setting up a KVM host with virt-manager that can be remotely managed through SSH with X forwarding.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">tar</span> <span class="nt">-xvf</span> librenms-centos-7.6-x86_64.ova</code></pre></figure>
+<p>I’m going to be using a CentOS 7 minimal installation that is fully patched.</p>
 
-<p>The virtual disk extracted should be fairly obvious. It’s the vmdk file called librenms-centos-7.6-x86_64-disk001.vmdk. All we need to do now is convert the vmdk file to qcow2 using qemu-img.</p>
+<p>To begin, install the virtualization host software.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>qemu-img convert librenms-centos-7.6-x86_64-disk001.vmdk librenms-centos-7.6-x86_64-disk001.qcow2 <span class="nt">-O</span> qcow2</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum group install <span class="nt">-y</span> <span class="s2">"Virtualization Host"</span></code></pre></figure>
 
-<p>You can verify the new format with the file command.</p>
+<p>Start the libvirtd service and verify it is enabled on startup.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>file librenms-centos-7.6-x86_64-disk001.qcow2
-librenms-centos-7.6-x86_64-disk001.qcow2: QEMU QCOW Image <span class="o">(</span>v3<span class="o">)</span>, 42949672960 bytes</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# systemctl start libvirtd
+~]# systemctl is-enabled libvirtd</code></pre></figure>
 
-<p>Now the real test. Import the qcow2 file into KVM. First I will move the file into /var/lib/libvirt/images.</p>
+<p>Install X Window System.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>mv librenms-centos-7.6-x86_64-disk001.qcow2 /var/lib/libvirt/images</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> <span class="s2">"@X Window System"</span></code></pre></figure>
 
-<p>I use virt-manager to manage my virtual machines. Create a new VM and select Import existing disk image. Select the qcow2 file and follow the rest of the prompts. The machine will start using the newly converted qcow2 disk image.</p>
+<p>Install virt-manager.</p>
 
-<p><img src="http://localhost:4000/assets/images/posts/2019/kvm-import-disk.png" alt="KVM Import Disk" /></p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> virt-manager</code></pre></figure>
+
+<p>The host setup is now complete. Now all we need to do is connect to the host through SSH with X Forwarding.</p>
+
+<h2 id="connecting-with-linux">Connecting with Linux</h2>
+<p>Open a terminal and SSH to the KVM host. Once connected open virt-manager.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>ssh <span class="nt">-X</span> rico@192.168.122.100
+~]<span class="nv">$ </span>su
+~]<span class="nv">$ </span>virt-manager</code></pre></figure>
+
+<h2 id="connecting-with-a-mac">Connecting with a Mac.</h2>
+<p>Download and install <a href="https://www.xquartz.org/">XQuartz</a>
+Open a terminal and SSH to the KVM host. Once connected open virt-manager.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>ssh <span class="nt">-X</span> rico@192.168.122.100
+~]<span class="nv">$ </span>su
+~]<span class="nv">$ </span>virt-manager</code></pre></figure>
+
+<h2 id="connecting-with-a-windows-system">Connecting with a Windows System</h2>
+<ul>
+  <li>Download, install, then open <a href="https://sourceforge.net/projects/xming/">xming</a></li>
+  <li>Download and open putty</li>
+  <li>Go to Connection &gt; SSH &gt; X11 and check Enable X11 forwarding</li>
+  <li>Go back to Session and enter the IP/Hostname of your machine and click Open</li>
+</ul>
+
+<h2 id="using-virt-manager-as-a-non-root-user">Using virt-manager as a non-root user</h2>
+
+<p>In the SSH examples above, I am SSH’ing as a non-root user, then changing to root to run virt-manager. This is because polkit blocks user accounts from accessing libvirtd.</p>
+
+<p>To work around this and allow non-root users who are part of the wheel group access to run virt-manager, create this rule:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# vi /etc/polkit-1/rules.d/51-libvirt.rules
+
+/<span class="k">*</span> Allow users <span class="k">in </span>wheel group to manage the libvirt
+daemon without authentication <span class="k">*</span>/
+polkit.addRule<span class="o">(</span><span class="k">function</span><span class="o">(</span>action, subject<span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span>action.id <span class="o">==</span> <span class="s2">"org.libvirt.unix.manage"</span> <span class="o">&amp;&amp;</span>
+        subject.isInGroup<span class="o">(</span><span class="s2">"wheel"</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return </span>polkit.Result.YES<span class="p">;</span>
+    <span class="o">}</span>
+<span class="o">})</span><span class="p">;</span></code></pre></figure>
 
 <h2 id="references">References</h2>
 
-<ul>
-  <li>
-    <p><a href="https://www.librenms.org/">LibreNMS</a></p>
-  </li>
-  <li>
-    <p><a href="http://edoceo.com/notabene/ova-to-vmdk-to-qcow2">Converting OVA for use with KVM / QCOW2</a></p>
-  </li>
-</ul>
+<p><a href="https://wiki.archlinux.org/index.php/Libvirt#Using_polkit">https://wiki.archlinux.org/index.php/Libvirt#Using_polkit</a></p>
+
 
         
       </section>
@@ -337,7 +373,7 @@ librenms-centos-7.6-x86_64-disk001.qcow2: QEMU QCOW Image <span class="o">(</spa
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-09-03T00:00:00-04:00">September 03, 2019</time></p>
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-09-16T00:00:00-04:00">September 16, 2019</time></p>
         
       </footer>
 
@@ -346,12 +382,11 @@ librenms-centos-7.6-x86_64-disk001.qcow2: QEMU QCOW Image <span class="o">(</spa
       
   <nav class="pagination">
     
-      <a href="/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7" class="pagination--pager" title="Up and running with Apache Guacamole on CentOS 7
+      <a href="/posts/2019/Raspberry-Pi-Network-Configuration" class="pagination--pager" title="Raspberry Pi Network Configuration
 ">Previous</a>
     
     
-      <a href="/posts/2019/Raspberry-Pi-Network-Configuration" class="pagination--pager" title="Raspberry Pi Network Configuration
-">Next</a>
+      <a href="#" class="pagination--pager disabled">Next</a>
     
   </nav>
 
@@ -365,34 +400,6 @@ librenms-centos-7.6-x86_64-disk001.qcow2: QEMU QCOW Image <span class="o">(</spa
     <div class="page__related">
       <h4 class="page__related-title">You May Also Enjoy</h4>
       <div class="grid__wrapper">
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/posts/2019/Headless-KVM-Host-with-CentOS-and-virt-manager" rel="permalink">Headless KVM Host with CentOS and virt-manager
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  2 minute read
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">Installing and managing a KVM virtualization host remotely with virt-manager
-</p>
-  </article>
-</div>
-
         
           
 
@@ -417,6 +424,34 @@ librenms-centos-7.6-x86_64-disk001.qcow2: QEMU QCOW Image <span class="o">(</spa
 </p>
     
     <p class="archive__item-excerpt" itemprop="description">How to configure various network settings on a Raspberry Pi
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2019/Converting-ova-file-to-qcow2" rel="permalink">Converting ova to qcow2
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to convert an ova file to qcow2 for use with a KVM hypervisor
 </p>
   </article>
 </div>
