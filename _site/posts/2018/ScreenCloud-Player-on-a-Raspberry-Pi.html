@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.16.6 by Michael Rose
+  Minimal Mistakes Jekyll Theme 4.17.0 by Michael Rose
   Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
@@ -34,6 +34,8 @@
   <meta property="article:published_time" content="2018-05-12T00:00:00-04:00">
 
 
+
+  <meta property="article:modified_time" content="2019-10-05T00:00:00-04:00">
 
 
 
@@ -78,7 +80,7 @@
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
 
-<!--[if IE ]>
+<!--[if IE]>
   <style>
     /* old IE unsupported flexbox fixes */
     .greedy-nav .site-title {
@@ -271,7 +273,7 @@
     <meta itemprop="headline" content="ScreenCloud Player on a Raspberry Pi">
     <meta itemprop="description" content="Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot.">
     <meta itemprop="datePublished" content="May 12, 2018">
-    
+    <meta itemprop="dateModified" content="October 05, 2019">
 
     <div class="page__inner-wrap">
       
@@ -285,6 +287,7 @@
 
 
   1 minute read
+
 </p>
           
         </header>
@@ -314,10 +317,10 @@
 
 <p>Configure Chromium to automatically start the ScreenCloud Player by editing the autostart file. Also, now is a good time to disable the screensaver.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>nano /home/pi/.config/lxsession/LXDE-pi/autostart
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>nano /etc/xdg/lxsession/LXDE-pi/autostart
 
 <span class="c"># Add this line:</span>
-@chromium <span class="nt">--app-id</span><span class="o">=</span>efdahhfldoeikfglgolhibmdidbnpneo <span class="nt">--disable-session-crashed-bubble</span>
+@chromium-browser <span class="nt">--app-id</span><span class="o">=</span>efdahhfldoeikfglgolhibmdidbnpneo <span class="nt">--disable-session-crashed-bubble</span>
 
 <span class="c"># Comment out this line</span>
 <span class="c">#@xscreensaver -no-splash</span></code></pre></figure>
@@ -343,6 +346,10 @@ OR
 
 <p>An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.</p>
 
+<p>The pi autostart file used to be located in /home/pi/.config/lxsession/LXDE-pi. It is now in /etc/xdg/lxsession/LXDE-pi.</p>
+
+<p>Chrome used to be launched through “chromium”. It is now launched through “chromium-browser”.</p>
+
         
       </section>
 
@@ -352,7 +359,7 @@ OR
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-05-12T00:00:00-04:00">May 12, 2018</time></p>
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-10-05">October 05, 2019</time></p>
         
       </footer>
 
@@ -401,6 +408,7 @@ OR
 
 
   2 minute read
+
 </p>
     
     <p class="archive__item-excerpt" itemprop="description">Installing and managing a KVM virtualization host remotely with virt-manager
@@ -429,6 +437,7 @@ OR
 
 
   less than 1 minute read
+
 </p>
     
     <p class="archive__item-excerpt" itemprop="description">How to configure various network settings on a Raspberry Pi
@@ -457,6 +466,7 @@ OR
 
 
   1 minute read
+
 </p>
     
     <p class="archive__item-excerpt" itemprop="description">How to convert an ova file to qcow2 for use with a KVM hypervisor
@@ -485,6 +495,7 @@ OR
 
 
   7 minute read
+
 </p>
     
     <p class="archive__item-excerpt" itemprop="description">How to setup a clientless remote access gateway using CentOS 7 and Apache Guacamole with AD authentication, Windows RDP, and Remote Apps

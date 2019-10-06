@@ -1,6 +1,7 @@
 ---
 title: "ScreenCloud Player on a Raspberry Pi"
 excerpt: "Installing ScreenCloud Player on a Raspberry Pi, and configuring it to automatically start on boot."
+last_modified_at: 2019-10-05
 ---
 [ScreenCloud](https://screen.cloud) is a digital signage solution that is very user friendly. It is simple to configure, and compatible with variety of TV's and devices.
 
@@ -25,10 +26,10 @@ The application will automatically open once it is added to Chromium. Exit full 
 
 Configure Chromium to automatically start the ScreenCloud Player by editing the autostart file. Also, now is a good time to disable the screensaver.
 {% highlight bash %}
-~]$ nano /home/pi/.config/lxsession/LXDE-pi/autostart
+~]$ nano /etc/xdg/lxsession/LXDE-pi/autostart
 
 # Add this line:
-@chromium --app-id=efdahhfldoeikfglgolhibmdidbnpneo --disable-session-crashed-bubble
+@chromium-browser --app-id=efdahhfldoeikfglgolhibmdidbnpneo --disable-session-crashed-bubble
 
 # Comment out this line
 #@xscreensaver -no-splash
@@ -57,3 +58,7 @@ If the pi is not set to automatically login do the following:
 {% endhighlight %}
 
 An alternative to finding the app-id is to navigate to chrome://apps in Chromium. Right click on ScreenCloud and create a shortcut on the desktop. Right click on the desktop shortcut and select properties. The app-id will be in the file path.
+
+The pi autostart file used to be located in /home/pi/.config/lxsession/LXDE-pi. It is now in /etc/xdg/lxsession/LXDE-pi.
+
+Chrome used to be launched through "chromium". It is now launched through "chromium-browser".
