@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.17.0 by Michael Rose
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
   Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
@@ -77,6 +77,7 @@
 
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
 
 <!--[if IE]>
   <style>
@@ -129,9 +130,9 @@
           
         </a>
         <ul class="visible-links"><li class="masthead__menu-item">
-              <a href="/about" >About</a>
+              <a href="/about">About</a>
             </li><li class="masthead__menu-item">
-              <a href="http://resume.ricosharp.com" >Resume</a>
+              <a href="http://resume.ricosharp.com">Resume</a>
             </li></ul>
         
         <button class="greedy-nav__toggle hidden" type="button">
@@ -160,8 +161,6 @@
 
   
     <div class="author__avatar">
-      
-
       
         <img src="/assets/images/bio-photo.jpg" alt="Rico Sharp" itemprop="image">
       
@@ -197,7 +196,7 @@
         <li>
           <a href="mailto:rico.sharp@gmail.com">
             <meta itemprop="email" content="rico.sharp@gmail.com" />
-            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
           </a>
         </li>
       
@@ -221,7 +220,7 @@
       
         <li>
           <a href="https://github.com/ricosharp" itemprop="sameAs" rel="nofollow noopener noreferrer">
-            <i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span>
           </a>
         </li>
       
@@ -267,10 +266,11 @@
   </div>
 
 
+
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
     <meta itemprop="headline" content="Samba 4 Active Directory Domain Controller on Ubuntu 18.04 Server">
     <meta itemprop="description" content="How to build an Active Directory Domain Controller using Samba 4 on a linux host">
-    <meta itemprop="datePublished" content="August 24, 2019">
+    <meta itemprop="datePublished" content="2019-08-24T00:00:00-04:00">
     
 
     <div class="page__inner-wrap">
@@ -337,12 +337,12 @@
 
 <p>Install relevant samba, winbind, and kerberos packages. The installation will prompt for kerberos settings and will give an error at the end of installation. Ignore this for now and accept the defaults. This will be configured properly later as part of the AD installation.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>apt install samba smbclient winbind libpam-winbind libnss-winbind krb5-kdc libpam-krb5 <span class="nt">-y</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>apt <span class="nb">install </span>samba smbclient winbind libpam-winbind libnss-winbind krb5-kdc libpam-krb5 <span class="nt">-y</span></code></pre></figure>
 
 <p>Rename samba and kerberos files. You need to start from a clean environment when starting the samba AD setup.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>mv /etc/samba/smb.conf /etc/samba/smb.conf.orig
-~]<span class="nv">$ </span><span class="nb">sudo </span>mv /etc/krb5.conf /etc/krb5.conf.orig</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo mv</span> /etc/samba/smb.conf /etc/samba/smb.conf.orig
+~]<span class="nv">$ </span><span class="nb">sudo mv</span> /etc/krb5.conf /etc/krb5.conf.orig</code></pre></figure>
 
 <h2 id="run-the-samba-ad-setup">Run the samba AD setup</h2>
 
@@ -374,15 +374,15 @@ Setting up sam.ldb schema
 Setting up sam.ldb configuration data
 Setting up display specifiers
 Modifying display specifiers
-Adding users container
-Modifying users container
+Adding <span class="nb">users </span>container
+Modifying <span class="nb">users </span>container
 Adding computers container
 Modifying computers container
 Setting up sam.ldb data
 Setting up well known security principals
-Setting up sam.ldb users and groups
-Setting up self join
-Adding DNS accounts
+Setting up sam.ldb <span class="nb">users </span>and <span class="nb">groups
+</span>Setting up self <span class="nb">join
+</span>Adding DNS accounts
 Creating <span class="nv">CN</span><span class="o">=</span>MicrosoftDNS,CN<span class="o">=</span>System,DC<span class="o">=</span>ad,DC<span class="o">=</span>ricosharp,DC<span class="o">=</span>com
 Creating DomainDnsZones and ForestDnsZones partitions
 Populating DomainDnsZones and ForestDnsZones partitions
@@ -399,7 +399,7 @@ DOMAIN SID:            S-1-5-21-2060062981-3252955935-809771608</code></pre></fi
 
 <p>Copy the provisioned kerberos configuration file to the kerberos configuration file location</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>cp /var/lib/samba/private/krb5.conf /etc</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo cp</span> /var/lib/samba/private/krb5.conf /etc</code></pre></figure>
 
 <h2 id="test-the-configuration">Test the configuration</h2>
 <p>Samba can now be run. But before setting up with systemd, start samba and run some tests with DNS.</p>
@@ -427,7 +427,7 @@ udp6       0      0 :::53                   :::<span class="k">*</span>         
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl stop systemd-resolved
 ~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl disable systemd-resolved
-~]<span class="nv">$ </span><span class="nb">sudo </span>unlink /etc/resolv.conf
+~]<span class="nv">$ </span><span class="nb">sudo unlink</span> /etc/resolv.conf
 ~]<span class="nv">$ </span><span class="nb">sudo </span>nano /etc/resolv.conf
 nameserver 192.168.122.70
 search ad.ricosharp.com
@@ -548,8 +548,9 @@ command:</p>
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-08-24T00:00:00-04:00">August 24, 2019</time></p>
-        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-08-24T00:00:00-04:00">August 24, 2019</time></p>
+
+
       </footer>
 
       
@@ -576,6 +577,35 @@ command:</p>
     <div class="page__related">
       <h4 class="page__related-title">You May Also Enjoy</h4>
       <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter" rel="permalink">How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to route all traffic from a single IP over a PPTP-VPN with Ubiqitui EdgeRouter
+</p>
+  </article>
+</div>
+
         
           
 
@@ -664,35 +694,6 @@ command:</p>
 </div>
 
         
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7" rel="permalink">Up and running with Apache Guacamole on CentOS 7
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  7 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">How to setup a clientless remote access gateway using CentOS 7 and Apache Guacamole with AD authentication, Windows RDP, and Remote Apps
-</p>
-  </article>
-</div>
-
-        
       </div>
     </div>
   
@@ -718,14 +719,13 @@ command:</p>
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2019 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2020 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 

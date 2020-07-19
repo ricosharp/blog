@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.17.0 by Michael Rose
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
   Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
---><html lang="en" class="no-js">
+-->
+<html lang="en" class="no-js">
   <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
 
 <!-- begin _includes/seo.html --><title>Over the Air TV to IPTV on Raspberry Pi - Rico Sharp</title>
@@ -77,6 +77,7 @@
 
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
 
 <!--[if IE]>
   <style>
@@ -164,8 +165,6 @@
   
     <div class="author__avatar">
       
-
-      
         <img src="/assets/images/bio-photo.jpg" alt="Rico Sharp" itemprop="image">
       
     </div>
@@ -200,7 +199,7 @@
         <li>
           <a href="mailto:rico.sharp@gmail.com">
             <meta itemprop="email" content="rico.sharp@gmail.com">
-            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
           </a>
         </li>
       
@@ -224,7 +223,7 @@
       
         <li>
           <a href="https://github.com/ricosharp" itemprop="sameAs" rel="nofollow noopener noreferrer">
-            <i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span>
           </a>
         </li>
       
@@ -270,10 +269,11 @@
   </div>
 
 
+
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
     <meta itemprop="headline" content="Over the Air TV to IPTV on Raspberry Pi">
     <meta itemprop="description" content="How to stream free to air television over an IP network">
-    <meta itemprop="datePublished" content="April 28, 2019">
+    <meta itemprop="datePublished" content="2019-04-28T00:00:00-04:00">
     
 
     <div class="page__inner-wrap">
@@ -337,7 +337,7 @@
 <p>Next, unmount the disk and write the OS to it. I’m using the current April 2019 Raspbian Stretch Lite with kernel version 4.14. After the image has been written to disk, unmount it again and insert the micro SD card into the Pi.</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]<span class="nv">$ </span>diskutil unmountdisk /dev/disk2
-~]<span class="nv">$ </span><span class="nb">sudo </span>dd <span class="k">if</span><span class="o">=</span>2019-04-08-raspbian-stretch-lite.img <span class="nv">of</span><span class="o">=</span>/dev/disk2
+~]<span class="nv">$ </span><span class="nb">sudo dd </span><span class="k">if</span><span class="o">=</span>2019-04-08-raspbian-stretch-lite.img <span class="nv">of</span><span class="o">=</span>/dev/disk2
 ~]<span class="nv">$ </span>diskutil unmountdisk /dev/disk2</code></pre></figure>
 
 <h2 id="run-updates-and-upgrade-kernel">Run updates and upgrade kernel</h2>
@@ -366,7 +366,7 @@ adapter0  adapter1</code></pre></figure>
 <p>Next, install the tools that we need to scan for channels and provide IPTV over the network.</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># install IPTV tools</span>
-~]<span class="nv">$ </span><span class="nb">sudo </span>apt install dvb-apps dvblast <span class="nt">-y</span></code></pre></figure>
+~]<span class="nv">$ </span><span class="nb">sudo </span>apt <span class="nb">install </span>dvb-apps dvblast <span class="nt">-y</span></code></pre></figure>
 
 <p>You can use the scan program included with dvb-apps to scan for free to air channels in your area. A file containing the frequencies to scan is required. The easiest way to perform the scan is to use a file from /usr/share/dvb/dvb-legacy/atsc (assuming you are in an ATSC country) containing predefined frequencies. I will use the us-ATSC-center-frequencies-8VSB file to perform the scan, then output the results to a channels.conf file.</p>
 
@@ -451,8 +451,9 @@ XITOS  :677028615:8VSB:97:100:6</code></pre></figure>
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-04-28T00:00:00-04:00">April 28, 2019</time></p>
-        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-04-28T00:00:00-04:00">April 28, 2019</time></p>
+
+
       </footer>
 
       
@@ -479,6 +480,35 @@ XITOS  :677028615:8VSB:97:100:6</code></pre></figure>
     <div class="page__related">
       <h4 class="page__related-title">You May Also Enjoy</h4>
       <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter" rel="permalink">How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to route all traffic from a single IP over a PPTP-VPN with Ubiqitui EdgeRouter
+</p>
+  </article>
+</div>
+
         
           
 
@@ -567,35 +597,6 @@ XITOS  :677028615:8VSB:97:100:6</code></pre></figure>
 </div>
 
         
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7" rel="permalink">Up and running with Apache Guacamole on CentOS 7
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  7 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">How to setup a clientless remote access gateway using CentOS 7 and Apache Guacamole with AD authentication, Windows RDP, and Remote Apps
-</p>
-  </article>
-</div>
-
-        
       </div>
     </div>
   
@@ -621,14 +622,13 @@ XITOS  :677028615:8VSB:97:100:6</code></pre></figure>
   </ul>
 </div>
 
-<div class="page__footer-copyright">© 2019 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">© 2020 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 

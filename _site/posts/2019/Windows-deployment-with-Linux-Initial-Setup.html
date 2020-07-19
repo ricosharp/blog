@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.17.0 by Michael Rose
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
   Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
@@ -77,6 +77,7 @@
 
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
 
 <!--[if IE]>
   <style>
@@ -129,9 +130,9 @@
           
         </a>
         <ul class="visible-links"><li class="masthead__menu-item">
-              <a href="/about" >About</a>
+              <a href="/about">About</a>
             </li><li class="masthead__menu-item">
-              <a href="http://resume.ricosharp.com" >Resume</a>
+              <a href="http://resume.ricosharp.com">Resume</a>
             </li></ul>
         
         <button class="greedy-nav__toggle hidden" type="button">
@@ -160,8 +161,6 @@
 
   
     <div class="author__avatar">
-      
-
       
         <img src="/assets/images/bio-photo.jpg" alt="Rico Sharp" itemprop="image">
       
@@ -197,7 +196,7 @@
         <li>
           <a href="mailto:rico.sharp@gmail.com">
             <meta itemprop="email" content="rico.sharp@gmail.com" />
-            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> Email
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
           </a>
         </li>
       
@@ -221,7 +220,7 @@
       
         <li>
           <a href="https://github.com/ricosharp" itemprop="sameAs" rel="nofollow noopener noreferrer">
-            <i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span>
           </a>
         </li>
       
@@ -267,10 +266,11 @@
   </div>
 
 
+
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
     <meta itemprop="headline" content="Windows 10 deployment with Linux - Initial Setup">
     <meta itemprop="description" content="A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux">
-    <meta itemprop="datePublished" content="May 13, 2019">
+    <meta itemprop="datePublished" content="2019-05-13T00:00:00-04:00">
     
 
     <div class="page__inner-wrap">
@@ -318,7 +318,7 @@
 <h2 id="linux-computer-with-a-samba-share"><a name="Linux computer with a Samba share">Linux computer with a Samba share</a></h2>
 <p>Install samba and policycoreutils-python. The latter package will give us the semanage command for SELinux.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> samba policycoreutils-python</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum <span class="nb">install</span> <span class="nt">-y</span> samba policycoreutils-python</code></pre></figure>
 
 <p>Create two user accounts; mdtread and mdtwrite. The mdtread account will used to connect to the deployment share during deployment. The mdtwrite account is what the Windows 10 computer will use to connect and make changes to the deployment share. These accounts are only needed for authentication so we won’t create a home directory (-M) or give them a shell (-s /sbin/nologin).</p>
 
@@ -331,12 +331,12 @@
 
 <p>Create and configure the MDT Share for Samba. I create this as a hidden share so it does not appear in an explorer window. I remove everything in the default smb.conf except the [global] section.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# mkdir <span class="nt">-p</span> /data/mdt
-~]# chown <span class="nt">-R</span> mdtwrite:mdtwrite /data/mdt
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# <span class="nb">mkdir</span> <span class="nt">-p</span> /data/mdt
+~]# <span class="nb">chown</span> <span class="nt">-R</span> mdtwrite:mdtwrite /data/mdt
 ~]# vi /etc/samba/smb.conf
 <span class="o">[</span>mdt<span class="nv">$]</span>
     path <span class="o">=</span> /data/mdt
-    valid users <span class="o">=</span> mdtread mdtwrite
+    valid <span class="nb">users</span> <span class="o">=</span> mdtread mdtwrite
     write list <span class="o">=</span> mdtwrite</code></pre></figure>
 
 <p>Verify everything is ok with the Samba configuration file</p>
@@ -446,7 +446,7 @@
 
 <p>Install TFTP Server.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> tftp-server</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum <span class="nb">install</span> <span class="nt">-y</span> tftp-server</code></pre></figure>
 
 <p>Enable TFTP Server in its configuration file by changing the disable line from yes to no.</p>
 
@@ -455,25 +455,25 @@ disable <span class="o">=</span> no</code></pre></figure>
 
 <p>Download syslinux. We need to use memdisk to boot the ISO. I just pull syslinux from the CentOS repos.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> syslinux</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum <span class="nb">install</span> <span class="nt">-y</span> syslinux</code></pre></figure>
 
 <p>Copy the necessary syslinux files to the tftpboot directory.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# cp /usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/
-~]# cp /usr/share/syslinux/memdisk /var/lib/tftpboot/
-~]# cp /usr/share/syslinux/menu.c32 /var/lib/tftpboot/</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# <span class="nb">cp</span> /usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/
+~]# <span class="nb">cp</span> /usr/share/syslinux/memdisk /var/lib/tftpboot/
+~]# <span class="nb">cp</span> /usr/share/syslinux/menu.c32 /var/lib/tftpboot/</code></pre></figure>
 
 <p>Copy the LiteTouch ISO to the tftpboot directory.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# cp /data/mdt/Boot/LiteTouchPE_x64.iso /var/lib/tftpboot/</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# <span class="nb">cp</span> /data/mdt/Boot/LiteTouchPE_x64.iso /var/lib/tftpboot/</code></pre></figure>
 
 <p>Create the boot menu.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# mkdir <span class="nt">-p</span> /var/lib/tftpboot/pxelinux.cfg
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# <span class="nb">mkdir</span> <span class="nt">-p</span> /var/lib/tftpboot/pxelinux.cfg
 ~]# vi /var/lib/tftpboot/pxelinux.cfg/default
 default menu.c32
 prompt 0
-timeout 300
+<span class="nb">timeout </span>300
 ONTIMEOUT 1
 
 menu title <span class="c">########## OS Deploy ##########</span>
@@ -501,7 +501,7 @@ append iso <span class="nv">initrd</span><span class="o">=</span>LiteTouchPE_x64
 <h2 id="dhcp-server"><a name="DHCP Server">DHCP Server</a></h2>
 <p>Install the DHCP server</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum install <span class="nt">-y</span> dhcp</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# yum <span class="nb">install</span> <span class="nt">-y</span> dhcp</code></pre></figure>
 
 <p>Configure the DHCP server</p>
 
@@ -533,7 +533,7 @@ subnet 192.168.122.0 netmask 255.255.255.0
 
 <p>When the Deployment Share was created, a few files and folders were created on it. We need to adjust some of the permissions so our mdtread user can access the share.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# chmod <span class="nt">-R</span> 755 /data/mdt</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">~]# <span class="nb">chmod</span> <span class="nt">-R</span> 755 /data/mdt</code></pre></figure>
 
 <h2 id="deployment">Deployment</h2>
 
@@ -566,8 +566,9 @@ subnet 192.168.122.0 netmask 255.255.255.0
 
 
         
-          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-13T00:00:00-04:00">May 13, 2019</time></p>
-        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-05-13T00:00:00-04:00">May 13, 2019</time></p>
+
+
       </footer>
 
       
@@ -594,6 +595,35 @@ subnet 192.168.122.0 netmask 255.255.255.0
     <div class="page__related">
       <h4 class="page__related-title">You May Also Enjoy</h4>
       <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter" rel="permalink">How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">How to route all traffic from a single IP over a PPTP-VPN with Ubiqitui EdgeRouter
+</p>
+  </article>
+</div>
+
         
           
 
@@ -682,35 +712,6 @@ subnet 192.168.122.0 netmask 255.255.255.0
 </div>
 
         
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/posts/2019/Up-and-running-with-Apache-Guacamole-on-Centos7" rel="permalink">Up and running with Apache Guacamole on CentOS 7
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  7 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">How to setup a clientless remote access gateway using CentOS 7 and Apache Guacamole with AD authentication, Windows RDP, and Remote Apps
-</p>
-  </article>
-</div>
-
-        
       </div>
     </div>
   
@@ -736,14 +737,13 @@ subnet 192.168.122.0 netmask 255.255.255.0
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2019 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2020 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 
