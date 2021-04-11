@@ -1,0 +1,778 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Centralized authentication with FreeIPA on Fedora - Rico Sharp</title>
+<meta name="description" content="How to setup a centralized authentication server with FreeIPA">
+
+
+  <meta name="author" content="Rico Sharp">
+  
+  <meta property="article:author" content="Rico Sharp">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Rico Sharp">
+<meta property="og:title" content="Centralized authentication with FreeIPA on Fedora">
+<meta property="og:url" content="http://localhost:4000/posts/2021/Centralized-authentication-with-FreeIPA-on-Fedora">
+
+
+  <meta property="og:description" content="How to setup a centralized authentication server with FreeIPA">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2021-04-11T00:00:00-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/posts/2021/Centralized-authentication-with-FreeIPA-on-Fedora">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Rico Sharp Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Rico Sharp
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about">About</a>
+            </li><li class="masthead__menu-item">
+              <a href="http://resume.ricosharp.com">Resume</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Rico Sharp" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Rico Sharp</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Washington, D.C.</span>
+        </li>
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:rico.sharp@gmail.com">
+            <meta itemprop="email" content="rico.sharp@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <li>
+          <a href="https://github.com/ricosharp" itemprop="sameAs" rel="nofollow noopener noreferrer">
+            <i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Centralized authentication with FreeIPA on Fedora">
+    <meta itemprop="description" content="How to setup a centralized authentication server with FreeIPA">
+    <meta itemprop="datePublished" content="2021-04-11T00:00:00-04:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Centralized authentication with FreeIPA on Fedora
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>The other day I logged into my Pi-Hole to update some DNS entries. I noticed a new version was available and decided to SSH into the device to run this. I tried a bunch of different username/password combinations and was lucky to finally log in. I realised that this was probably the time to implement some sort of centralized authentication on my network.</p>
+
+<p>This post will outline a basic, single FreeIPA server setup. I am running the FreeIPA server on Fedora 33 Server and the client PC is running Fedora 33 Workstation. I will create a new post in future to include addtional FreeIPA servers with replication.</p>
+
+<p>The server will be set up with the hostname and IP address in the table below. I have added a DNS entry to this on my Pi-Hole so other FreeIPA servers can find this host later on. It’s also useful as I will be using my host PC to access the FreeIPA web interface.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Hostname</th>
+      <th>IP Address</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ipa01.ipa.ricosharp.com</td>
+      <td>192.168.122.2</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>If you are following this guide in your own setup, make sure that DNS is resolving correctly. This will be the most likely cause of your issue.</p>
+
+<h1 id="freeipa-server">FreeIPA Server</h1>
+
+<p>Set a static IP address on the server (192.168.1.7 is my Pi-Hole):</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">nmcli con mod &lt;int&gt; ipv4.address 192.168.122.2/24
+nmcli con mod &lt;int&gt; ipv4.gateway 192.168.122.1
+nmcli con mod &lt;int&gt; ipv4.dns 192.168.1.7
+nmcli con mod &lt;int&gt; ipv4.method manual
+nmcli con down &lt;int&gt;
+nmcli con up &lt;int&gt;</code></pre></figure>
+
+<p>Run any updates to the system and reboot:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>dnf update <span class="nt">-y</span>
+reboot</code></pre></figure>
+
+<p>Set the hostname of the machine to the FQDN of the server:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>hostnamectl set-hostname ipa01.ipa.ricosharp.com</code></pre></figure>
+
+<p>Update /etc/hosts with the IP address and FQDN (FQDN must be specified first!):</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>vi /etc/hosts
+<span class="c"># Add the following:</span>
+192.168.122.2 ipa01.ipa.ricosharp.com ipa01</code></pre></figure>
+
+<p>Install the FreeIPA server and FreeIPA DNS packages:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>dnf <span class="nb">install </span>freeipa-server freeipa-server-dns <span class="nt">-y</span></code></pre></figure>
+
+<p>Add the following firewall rules. You can see which ports are opened by viewing /usr/lib/firewalld/services/ldap.xml and /usr/lib/firewalld/services/ldaps.xml</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>firewall-cmd <span class="nt">--add-service</span><span class="o">=</span>freeipa-ldap <span class="nt">--add-service</span><span class="o">=</span>freeipa-ldaps <span class="nt">--add-service</span><span class="o">=</span>dns
+<span class="nb">sudo </span>firewall-cmd <span class="nt">--add-service</span><span class="o">=</span>freeipa-ldap <span class="nt">--add-service</span><span class="o">=</span>freeipa-ldaps <span class="nt">--add-service</span><span class="o">=</span>dns <span class="nt">--permanent</span></code></pre></figure>
+
+<p>Run the FreeIPA server installer. Be sure to add the mkhomedir option, as this will create a folder in /home for a user logging in for the first time. If you ommit this option, then things may not run properly for logged in users.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>ipa-server-install <span class="nt">--mkhomedir</span></code></pre></figure>
+
+<p>Next you will be prompted for some information. You can specify all this on the command line but I like to answer it interactively. I say yes to install the integrated DNS server. The script detects the hostname and domain name automatically and I will be using IPA.RICOSHARP.COM as the realm name. Enter a password for the admin and Directory Manager accounts when prompted.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">The log file <span class="k">for </span>this installation can be found <span class="k">in</span> /var/log/ipaserver-install.log
+<span class="o">==============================================================================</span>
+This program will <span class="nb">set </span>up the IPA Server.
+Version 4.9.2
+
+This includes:
+  <span class="k">*</span> Configure a stand-alone CA <span class="o">(</span>dogtag<span class="o">)</span> <span class="k">for </span>certificate management
+  <span class="k">*</span> Configure the NTP client <span class="o">(</span>chronyd<span class="o">)</span>
+  <span class="k">*</span> Create and configure an instance of Directory Server
+  <span class="k">*</span> Create and configure a Kerberos Key Distribution Center <span class="o">(</span>KDC<span class="o">)</span>
+  <span class="k">*</span> Configure Apache <span class="o">(</span>httpd<span class="o">)</span>
+  <span class="k">*</span> Configure the KDC to <span class="nb">enable </span>PKINIT
+
+To accept the default shown <span class="k">in </span>brackets, press the Enter key.
+
+Do you want to configure integrated DNS <span class="o">(</span>BIND<span class="o">)</span>? <span class="o">[</span>no]: <span class="nb">yes
+
+</span>Enter the fully qualified domain name of the computer
+on which you<span class="s1">'re setting up server software. Using the form
+&lt;hostname&gt;.&lt;domainname&gt;
+Example: master.example.com.
+
+
+Server host name [ipa01.ipa.ricosharp.com]: 
+
+Warning: skipping DNS resolution of host ipa01.ipa.ricosharp.com
+The domain name has been determined based on the host name.
+
+Please confirm the domain name [ipa.ricosharp.com]: 
+
+The kerberos protocol requires a Realm name to be defined.
+This is typically the domain name converted to uppercase.
+
+Please provide a realm name [IPA.RICOSHARP.COM]: 
+Certain directory server operations require an administrative user.
+This user is referred to as the Directory Manager and has full access
+to the Directory for system management tasks and will be added to the
+instance of directory server created for IPA.
+The password must be at least 8 characters long.
+
+Directory Manager password: 
+Password (confirm): 
+
+The IPA server requires an administrative user, named '</span>admin<span class="s1">'.
+This user is a regular system account used for IPA server administration.
+
+IPA admin password: 
+Password (confirm): 
+
+Checking DNS domain ipa.ricosharp.com., please wait ...
+Do you want to configure DNS forwarders? [yes]: 
+The following DNS servers are configured in systemd-resolved: 192.168.1.7
+Do you want to configure these servers as DNS forwarders? [yes]: 
+All detected DNS servers were added. You can enter additional addresses now:
+Enter an IP address for a DNS forwarder, or press Enter to skip: 
+DNS forwarders: 192.168.1.7
+Checking DNS forwarders, please wait ...
+Do you want to search for missing reverse zones? [yes]: 
+Reverse record for IP address 192.168.122.2 already exists
+Do you want to configure chrony with NTP server or pool address? [no]: 
+
+The IPA Master Server will be configured with:
+Hostname:       ipa01.ipa.ricosharp.com
+IP address(es): 192.168.122.2
+Domain name:    ipa.ricosharp.com
+Realm name:     IPA.RICOSHARP.COM
+
+The CA will be configured with:
+Subject DN:   CN=Certificate Authority,O=IPA.RICOSHARP.COM
+Subject base: O=IPA.RICOSHARP.COM
+Chaining:     self-signed
+
+BIND DNS server will be configured to serve IPA domain with:
+Forwarders:       192.168.1.7
+Forward policy:   only
+Reverse zone(s):  No reverse zone
+
+Continue to configure the system with these values? [no]: yes
+
+...
+...
+...
+...
+
+Setup complete
+
+Next steps:
+	1. You must make sure these network ports are open:
+		TCP Ports:
+		  * 80, 443: HTTP/HTTPS
+		  * 389, 636: LDAP/LDAPS
+		  * 88, 464: kerberos
+		  * 53: bind
+		UDP Ports:
+		  * 88, 464: kerberos
+		  * 53: bind
+		  * 123: ntp
+
+	2. You can now obtain a kerberos ticket using the command: '</span>kinit admin<span class="s1">'
+	   This ticket will allow you to use the IPA tools (e.g., ipa user-add)
+	   and the web user interface.
+
+Be sure to back up the CA certificates stored in /root/cacert.p12
+These files are required to create replicas. The password for these
+files is the Directory Manager password
+The ipa-server-install command was successful</span></code></pre></figure>
+
+<p>Next I will change the DNS of the FreeIPA server to itself:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>nmcli con mod enp1s0 ipv4.dns 192.168.122.2</code></pre></figure>
+
+<p>I also like to change a few default settings such as the default shell and removing the default email domain:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">kinit admin
+ipa config-mod <span class="nt">--defaultshell</span> /bin/bash
+ipa config-mod <span class="nt">--emaildomain</span> <span class="s2">""</span></code></pre></figure>
+
+<p>Now create a test user:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">kinit admin
+<span class="c"># Interactively:</span>
+ipa user-add <span class="nt">--password</span>
+<span class="c"># Single Command (other options can be found by runing ipa user-add --help)</span>
+ipa user-add <span class="nb">test</span> <span class="nt">--first</span><span class="o">=</span><span class="nb">test</span> <span class="nt">--last</span><span class="o">=</span><span class="nb">test</span> <span class="nt">--password</span></code></pre></figure>
+
+<p>Thankfully all the above can also be done easily in the web interface. In my case it is here:</p>
+
+<p><a href="https://ipa01.ipa.ricosharp.com">https://ipa01.ipa.ricosharp.com</a></p>
+
+<h1 id="client-pc">Client PC</h1>
+
+<p>I’ll setup DHCP later but for now the client PC is running with these static network settings. The DNS server is our FreeIPA server which helps the client discover information when running the client installation.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>IP Address</th>
+      <th>Gateway</th>
+      <th>DNS Server</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>192.168.122.100/24</td>
+      <td>192.168.122.1</td>
+      <td>192.168.122.2</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Now on a client PC, install freeipa-client</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>dnf <span class="nb">install </span>freeipa-client <span class="nt">-y</span></code></pre></figure>
+
+<p>Run the FreeIPA client installer. If your DNS is setup correctly everything wil be found and you will only need to enter the admin username/password when prompted. Don’t forget to add the mkhomedir option. I also like to add the enable-dns-updates option so the client’s DNS entries update on the server when an IP address changes.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>ipa-client-install <span class="nt">--mkhomedir</span> <span class="nt">--enable-dns-updates</span></code></pre></figure>
+
+<p>Now reboot the client PC and try logging in with the test account.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2021-04-11T00:00:00-04:00">April 11, 2021</time></p>
+
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter" class="pagination--pager" title="How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter" rel="permalink">How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How to route all traffic from a single IP over a PPTP-VPN with Ubiqitui EdgeRouter
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/posts/2019/Headless-KVM-Host-with-CentOS-and-virt-manager" rel="permalink">Headless KVM Host with CentOS and virt-manager
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Installing and managing a KVM virtualization host remotely with virt-manager
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/posts/2019/Raspberry-Pi-Network-Configuration" rel="permalink">Raspberry Pi Network Configuration
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          less than 1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How to configure various network settings on a Raspberry Pi
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/posts/2019/Converting-ova-file-to-qcow2" rel="permalink">Converting ova to qcow2
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">How to convert an ova file to qcow2 for use with a KVM hypervisor
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2021 Rico Sharp. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

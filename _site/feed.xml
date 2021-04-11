@@ -1,4 +1,226 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-07-19T12:34:58-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter</title><link href="http://localhost:4000/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter" rel="alternate" type="text/html" title="How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter" /><published>2020-07-19T00:00:00-04:00</published><updated>2020-07-19T00:00:00-04:00</updated><id>http://localhost:4000/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter</id><content type="html" xml:base="http://localhost:4000/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter">&lt;p&gt;This post will show you how to route all traffic from a particular IP address over a PPTP VPN using a Ubiqitui EdgeRouter. I wanted to do this with a host on my network that pulls video streams which would otherwise be geo-blocked using my public ip address. The below configuration is more specific to my lab environment but can be tweaked to be used in any situation. It can also be changed to allow for an entire subnet to be tunneled over the VPN.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-04-11T16:14:18-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Rico Sharp</title><subtitle></subtitle><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><entry><title type="html">Centralized authentication with FreeIPA on Fedora</title><link href="http://localhost:4000/posts/2021/Centralized-authentication-with-FreeIPA-on-Fedora" rel="alternate" type="text/html" title="Centralized authentication with FreeIPA on Fedora" /><published>2021-04-11T00:00:00-04:00</published><updated>2021-04-11T00:00:00-04:00</updated><id>http://localhost:4000/posts/2021/Centralized-authentication-with-FreeIPA-on-Fedora</id><content type="html" xml:base="http://localhost:4000/posts/2021/Centralized-authentication-with-FreeIPA-on-Fedora">&lt;p&gt;The other day I logged into my Pi-Hole to update some DNS entries. I noticed a new version was available and decided to SSH into the device to run this. I tried a bunch of different username/password combinations and was lucky to finally log in. I realised that this was probably the time to implement some sort of centralized authentication on my network.&lt;/p&gt;
+
+&lt;p&gt;This post will outline a basic, single FreeIPA server setup. I am running the FreeIPA server on Fedora 33 Server and the client PC is running Fedora 33 Workstation. I will create a new post in future to include addtional FreeIPA servers with replication.&lt;/p&gt;
+
+&lt;p&gt;The server will be set up with the hostname and IP address in the table below. I have added a DNS entry to this on my Pi-Hole so other FreeIPA servers can find this host later on. It’s also useful as I will be using my host PC to access the FreeIPA web interface.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Hostname&lt;/th&gt;
+      &lt;th&gt;IP Address&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;ipa01.ipa.ricosharp.com&lt;/td&gt;
+      &lt;td&gt;192.168.122.2&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;If you are following this guide in your own setup, make sure that DNS is resolving correctly. This will be the most likely cause of your issue.&lt;/p&gt;
+
+&lt;h1 id=&quot;freeipa-server&quot;&gt;FreeIPA Server&lt;/h1&gt;
+
+&lt;p&gt;Set a static IP address on the server (192.168.1.7 is my Pi-Hole):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;nmcli con mod &amp;lt;int&amp;gt; ipv4.address 192.168.122.2/24
+nmcli con mod &amp;lt;int&amp;gt; ipv4.gateway 192.168.122.1
+nmcli con mod &amp;lt;int&amp;gt; ipv4.dns 192.168.1.7
+nmcli con mod &amp;lt;int&amp;gt; ipv4.method manual
+nmcli con down &amp;lt;int&amp;gt;
+nmcli con up &amp;lt;int&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Run any updates to the system and reboot:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;dnf update &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
+reboot&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Set the hostname of the machine to the FQDN of the server:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;hostnamectl set-hostname ipa01.ipa.ricosharp.com&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Update /etc/hosts with the IP address and FQDN (FQDN must be specified first!):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;vi /etc/hosts
+&lt;span class=&quot;c&quot;&gt;# Add the following:&lt;/span&gt;
+192.168.122.2 ipa01.ipa.ricosharp.com ipa01&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Install the FreeIPA server and FreeIPA DNS packages:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;dnf &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;freeipa-server freeipa-server-dns &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Add the following firewall rules. You can see which ports are opened by viewing /usr/lib/firewalld/services/ldap.xml and /usr/lib/firewalld/services/ldaps.xml&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;firewall-cmd &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;freeipa-ldap &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;freeipa-ldaps &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;dns
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;firewall-cmd &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;freeipa-ldap &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;freeipa-ldaps &lt;span class=&quot;nt&quot;&gt;--add-service&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;dns &lt;span class=&quot;nt&quot;&gt;--permanent&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Run the FreeIPA server installer. Be sure to add the mkhomedir option, as this will create a folder in /home for a user logging in for the first time. If you ommit this option, then things may not run properly for logged in users.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ipa-server-install &lt;span class=&quot;nt&quot;&gt;--mkhomedir&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Next you will be prompted for some information. You can specify all this on the command line but I like to answer it interactively. I say yes to install the integrated DNS server. The script detects the hostname and domain name automatically and I will be using IPA.RICOSHARP.COM as the realm name. Enter a password for the admin and Directory Manager accounts when prompted.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;The log file &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;this installation can be found &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; /var/log/ipaserver-install.log
+&lt;span class=&quot;o&quot;&gt;==============================================================================&lt;/span&gt;
+This program will &lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;up the IPA Server.
+Version 4.9.2
+
+This includes:
+  &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; Configure a stand-alone CA &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;dogtag&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;certificate management
+  &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; Configure the NTP client &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;chronyd&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; Create and configure an instance of Directory Server
+  &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; Create and configure a Kerberos Key Distribution Center &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;KDC&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; Configure Apache &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;httpd&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; Configure the KDC to &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;PKINIT
+
+To accept the default shown &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;brackets, press the Enter key.
+
+Do you want to configure integrated DNS &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;BIND&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;? &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;no]: &lt;span class=&quot;nb&quot;&gt;yes
+
+&lt;/span&gt;Enter the fully qualified domain name of the computer
+on which you&lt;span class=&quot;s1&quot;&gt;'re setting up server software. Using the form
+&amp;lt;hostname&amp;gt;.&amp;lt;domainname&amp;gt;
+Example: master.example.com.
+
+
+Server host name [ipa01.ipa.ricosharp.com]: 
+
+Warning: skipping DNS resolution of host ipa01.ipa.ricosharp.com
+The domain name has been determined based on the host name.
+
+Please confirm the domain name [ipa.ricosharp.com]: 
+
+The kerberos protocol requires a Realm name to be defined.
+This is typically the domain name converted to uppercase.
+
+Please provide a realm name [IPA.RICOSHARP.COM]: 
+Certain directory server operations require an administrative user.
+This user is referred to as the Directory Manager and has full access
+to the Directory for system management tasks and will be added to the
+instance of directory server created for IPA.
+The password must be at least 8 characters long.
+
+Directory Manager password: 
+Password (confirm): 
+
+The IPA server requires an administrative user, named '&lt;/span&gt;admin&lt;span class=&quot;s1&quot;&gt;'.
+This user is a regular system account used for IPA server administration.
+
+IPA admin password: 
+Password (confirm): 
+
+Checking DNS domain ipa.ricosharp.com., please wait ...
+Do you want to configure DNS forwarders? [yes]: 
+The following DNS servers are configured in systemd-resolved: 192.168.1.7
+Do you want to configure these servers as DNS forwarders? [yes]: 
+All detected DNS servers were added. You can enter additional addresses now:
+Enter an IP address for a DNS forwarder, or press Enter to skip: 
+DNS forwarders: 192.168.1.7
+Checking DNS forwarders, please wait ...
+Do you want to search for missing reverse zones? [yes]: 
+Reverse record for IP address 192.168.122.2 already exists
+Do you want to configure chrony with NTP server or pool address? [no]: 
+
+The IPA Master Server will be configured with:
+Hostname:       ipa01.ipa.ricosharp.com
+IP address(es): 192.168.122.2
+Domain name:    ipa.ricosharp.com
+Realm name:     IPA.RICOSHARP.COM
+
+The CA will be configured with:
+Subject DN:   CN=Certificate Authority,O=IPA.RICOSHARP.COM
+Subject base: O=IPA.RICOSHARP.COM
+Chaining:     self-signed
+
+BIND DNS server will be configured to serve IPA domain with:
+Forwarders:       192.168.1.7
+Forward policy:   only
+Reverse zone(s):  No reverse zone
+
+Continue to configure the system with these values? [no]: yes
+
+...
+...
+...
+...
+
+Setup complete
+
+Next steps:
+	1. You must make sure these network ports are open:
+		TCP Ports:
+		  * 80, 443: HTTP/HTTPS
+		  * 389, 636: LDAP/LDAPS
+		  * 88, 464: kerberos
+		  * 53: bind
+		UDP Ports:
+		  * 88, 464: kerberos
+		  * 53: bind
+		  * 123: ntp
+
+	2. You can now obtain a kerberos ticket using the command: '&lt;/span&gt;kinit admin&lt;span class=&quot;s1&quot;&gt;'
+	   This ticket will allow you to use the IPA tools (e.g., ipa user-add)
+	   and the web user interface.
+
+Be sure to back up the CA certificates stored in /root/cacert.p12
+These files are required to create replicas. The password for these
+files is the Directory Manager password
+The ipa-server-install command was successful&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Next I will change the DNS of the FreeIPA server to itself:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nmcli con mod enp1s0 ipv4.dns 192.168.122.2&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;I also like to change a few default settings such as the default shell and removing the default email domain:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;kinit admin
+ipa config-mod &lt;span class=&quot;nt&quot;&gt;--defaultshell&lt;/span&gt; /bin/bash
+ipa config-mod &lt;span class=&quot;nt&quot;&gt;--emaildomain&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now create a test user:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;kinit admin
+&lt;span class=&quot;c&quot;&gt;# Interactively:&lt;/span&gt;
+ipa user-add &lt;span class=&quot;nt&quot;&gt;--password&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Single Command (other options can be found by runing ipa user-add --help)&lt;/span&gt;
+ipa user-add &lt;span class=&quot;nb&quot;&gt;test&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--first&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;test&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--last&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;test&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--password&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Thankfully all the above can also be done easily in the web interface. In my case it is here:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://ipa01.ipa.ricosharp.com&quot;&gt;https://ipa01.ipa.ricosharp.com&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;client-pc&quot;&gt;Client PC&lt;/h1&gt;
+
+&lt;p&gt;I’ll setup DHCP later but for now the client PC is running with these static network settings. The DNS server is our FreeIPA server which helps the client discover information when running the client installation.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;IP Address&lt;/th&gt;
+      &lt;th&gt;Gateway&lt;/th&gt;
+      &lt;th&gt;DNS Server&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;192.168.122.100/24&lt;/td&gt;
+      &lt;td&gt;192.168.122.1&lt;/td&gt;
+      &lt;td&gt;192.168.122.2&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Now on a client PC, install freeipa-client&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;dnf &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;freeipa-client &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Run the FreeIPA client installer. If your DNS is setup correctly everything wil be found and you will only need to enter the admin username/password when prompted. Don’t forget to add the mkhomedir option. I also like to add the enable-dns-updates option so the client’s DNS entries update on the server when an IP address changes.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ipa-client-install &lt;span class=&quot;nt&quot;&gt;--mkhomedir&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--enable-dns-updates&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now reboot the client PC and try logging in with the test account.&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">How to setup a centralized authentication server with FreeIPA</summary></entry><entry><title type="html">How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter</title><link href="http://localhost:4000/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter" rel="alternate" type="text/html" title="How to route traffic from a single IP over a VPN with Ubiquiti EdgeRouter" /><published>2020-07-19T00:00:00-04:00</published><updated>2020-07-19T00:00:00-04:00</updated><id>http://localhost:4000/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter</id><content type="html" xml:base="http://localhost:4000/posts/2020/How-to-route-traffic-from-a-single-IP-over-a-VPN-with-Ubiquiti-EdgeRouter">&lt;p&gt;This post will show you how to route all traffic from a particular IP address over a PPTP VPN using a Ubiqitui EdgeRouter. I wanted to do this with a host on my network that pulls video streams which would otherwise be geo-blocked using my public ip address. The below configuration is more specific to my lab environment but can be tweaked to be used in any situation. It can also be changed to allow for an entire subnet to be tunneled over the VPN.&lt;/p&gt;
 
 &lt;p&gt;In this example I am using an EdgeRouter PoE 5 port router. The configuration will be quite similar across any EdgeRouter product.&lt;/p&gt;
 
@@ -1002,8 +1224,4 @@ subnet 192.168.122.0 netmask 255.255.255.0
 &lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
 &lt;p&gt;&lt;a href=&quot;https://wiki.samba.org/index.php/Setting_up_Samba_as_a_Standalone_Server#Creating_a_Local_User_Account&quot;&gt;Samba - Creating Local Accounts&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html&quot;&gt;Samba Configuration File&lt;/a&gt;&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux</summary></entry><entry><title type="html">Fedora 30 Customization</title><link href="http://localhost:4000/posts/2019/Fedora-30-Customization" rel="alternate" type="text/html" title="Fedora 30 Customization" /><published>2019-05-12T00:00:00-04:00</published><updated>2019-05-12T00:00:00-04:00</updated><id>http://localhost:4000/posts/2019/Fedora-30-Customization</id><content type="html" xml:base="http://localhost:4000/posts/2019/Fedora-30-Customization">&lt;p&gt;This is pretty much the same script as my &lt;a href=&quot;https://blog.ricosharp.com/posts/2019/Ubuntu-Customization&quot;&gt;Ubuntu&lt;/a&gt; one, minus VLC player. Actually, as I write this I’ve completly forgotten to include Jekyll! I’ll sort that out another day.&lt;/p&gt;
-
-&lt;p&gt;This script is intended to be run under Fedora 30. It isn’t my current desktop environment as I have had a lot of issues with GNS3 under it. But I thought I would update it anyway.&lt;/p&gt;
-
-&lt;script src=&quot;https://gist.github.com/ricosharp/7d4ce9e70f7b3d614ba2a7f54b9edb29.js&quot;&gt;&lt;/script&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A script I use to customize my Fedora 30 environment</summary></entry></feed>
+&lt;p&gt;&lt;a href=&quot;https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html&quot;&gt;Samba Configuration File&lt;/a&gt;&lt;/p&gt;</content><author><name>Rico Sharp</name><email>rico.sharp@gmail.com</email></author><summary type="html">A guide to deploying Windows 10 over a network with Microsoft Deployment Toolkit (MDT) and Linux</summary></entry></feed>
